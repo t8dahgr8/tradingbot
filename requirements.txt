@@ -1,0 +1,4 @@
+# Live feeds only. The models, broker, portfolio, risk engine, simulator and
+# dashboard are pure stdlib, so `simulate` and the tests run with no installs.
+websockets>=12.0
+PyYAML>=6.0

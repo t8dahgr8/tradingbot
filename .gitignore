@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.DS_Store
+.idea/
+.vscode/
+
+# Runtime state: local trading results, not source.
+state/
+*.log
+
+# The published dashboard snapshot is committed on purpose (GitHub Pages),
+# so it is NOT ignored: docs/data.json

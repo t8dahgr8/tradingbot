@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polymarket Paper Trader</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2129; --line:#2a313c;
+    --txt:#e6edf3; --dim:#8b949e; --accent:#58a6ff;
+    --up:#3fb950; --down:#f85149; --warn:#d29922;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:1240px;margin:0 auto;padding:24px 20px 60px}
+  header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:4px}
+  h1{font-size:20px;margin:0;font-weight:600;letter-spacing:-.01em}
+  .pill{font-size:11px;padding:3px 9px;border-radius:99px;border:1px solid var(--line);
+        color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+  .pill.paper{border-color:#1f6feb55;background:#1f6feb1a;color:var(--accent)}
+  .pill.halt{border-color:#f8514955;background:#f851491a;color:var(--down)}
+  .sub{color:var(--dim);font-size:12px;margin:6px 0 22px}
+  .grid{display:grid;gap:14px}
+  .cards{grid-template-columns:repeat(auto-fit,minmax(165px,1fr));margin-bottom:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .card .k{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+  .card .v{font-size:23px;font-weight:600;margin-top:5px;font-family:var(--mono);
+           letter-spacing:-.02em}
+  .card .n{font-size:11px;color:var(--dim);margin-top:3px}
+  .up{color:var(--up)} .down{color:var(--down)} .warn{color:var(--warn)}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+         padding:16px 18px;margin-bottom:16px}
+  .panel h2{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--dim);
+            margin:0 0 12px;font-weight:600}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:var(--dim);font-weight:500;font-size:11px;
+     text-transform:uppercase;letter-spacing:.05em;padding:0 10px 8px 0;
+     border-bottom:1px solid var(--line)}
+  td{padding:8px 10px 8px 0;border-bottom:1px solid #21262d;font-family:var(--mono);
+     font-size:12.5px}
+  tr:last-child td{border-bottom:none}
+  td.txt{font-family:inherit;font-size:13px}
+  .r{text-align:right}
+  .empty{color:var(--dim);font-size:13px;padding:18px 0;text-align:center}
+  .two{grid-template-columns:1fr 1fr}
+  @media(max-width:860px){.two{grid-template-columns:1fr}}
+  .dot{display:inline-block;width:7px;height:7px;border-radius:99px;margin-right:6px;
+       vertical-align:middle}
+  .dot.on{background:var(--up)} .dot.off{background:var(--down)}
+  .bar{height:5px;background:var(--panel2);border-radius:99px;overflow:hidden;margin-top:5px}
+  .bar>i{display:block;height:100%;background:var(--accent)}
+  .badge{font-size:10px;padding:2px 6px;border-radius:4px;background:var(--panel2);
+         color:var(--dim);text-transform:uppercase;letter-spacing:.04em}
+  .badge.buy{background:#3fb9501f;color:var(--up)}
+  .badge.sell{background:#f851491f;color:var(--down)}
+  footer{color:var(--dim);font-size:11px;text-align:center;margin-top:26px}
+  canvas{max-height:230px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Polymarket Paper Trader</h1>
+    <span class="pill paper">Paper — no real money</span>
+    <span id="haltPill"></span>
+  </header>
+  <div class="sub" id="meta">Loading…</div>
+
+  <div class="grid cards" id="cards"></div>
+
+  <div class="panel">
+    <h2>Equity curve</h2>
+    <canvas id="chart"></canvas>
+  </div>
+
+  <div class="grid two">
+    <div class="panel">
+      <h2>Live matches tracked</h2>
+      <div id="tracked"></div>
+    </div>
+    <div class="panel">
+      <h2>Open positions</h2>
+      <div id="positions"></div>
+    </div>
+  </div>
+
+  <div class="grid two">
+    <div class="panel">
+      <h2>Recent fills</h2>
+      <div id="trades"></div>
+    </div>
+    <div class="panel">
+      <h2>Why signals were rejected</h2>
+      <div id="rejections"></div>
+      <h2 style="margin-top:20px">Feeds</h2>
+      <div id="feeds"></div>
+    </div>
+  </div>
+
+  <footer>
+    Simulated execution against real order books. Refreshes every 5s.
+  </footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const money = v => (v<0?"-":"") + "$" + Math.abs(v).toFixed(2);
+const pct = v => (v>=0?"+":"") + v.toFixed(2) + "%";
+const cls = v => v > 0 ? "up" : (v < 0 ? "down" : "");
+let chart = null;
+
+function card(k, v, note, klass){
+  return `<div class="card"><div class="k">${k}</div>
+          <div class="v ${klass||""}">${v}</div>
+          ${note?`<div class="n">${note}</div>`:""}</div>`;
+}
+
+function table(cols, rows, empty){
+  if(!rows.length) return `<div class="empty">${empty}</div>`;
+  return `<table><thead><tr>${cols.map(c=>
+      `<th class="${c.r?"r":""}">${c.h}</th>`).join("")}</tr></thead>
+    <tbody>${rows.join("")}</tbody></table>`;
+}
+
+function render(d){
+  const s = d.stats || {};
+  const ret = s.total_return_pct ?? 0;
+
+  $("meta").textContent =
+    `Updated ${new Date(d.generated_at).toLocaleTimeString()} · ` +
+    `${d.runtime_minutes ?? 0} min runtime · ${d.signals ?? 0} signals · ` +
+    `${d.orders ?? 0} orders sent`;
+
+  $("haltPill").innerHTML = d.halted
+    ? `<span class="pill halt">Halted — ${d.halt_reason||""}</span>` : "";
+
+  $("cards").innerHTML = [
+    card("Equity", money(s.equity ?? 0), `from ${money(s.starting_cash ?? 0)}`, cls(ret)),
+    card("Return", pct(ret), "mark-to-mid", cls(ret)),
+    card("Liquidation value", money(d.liquidation_equity ?? 0),
+         "if you exited now", cls((d.liquidation_equity ?? 0) - (s.starting_cash ?? 0))),
+    card("Realized P&L", money(s.realized_pnl ?? 0), `fees ${money(s.fees_paid ?? 0)}`,
+         cls(s.realized_pnl ?? 0)),
+    card("Cash", money(s.cash ?? 0), `exposure ${money(s.exposure ?? 0)}`),
+    card("Max drawdown", (s.max_drawdown_pct ?? 0).toFixed(2) + "%",
+         `${s.open_positions ?? 0} open · ${s.num_fills ?? 0} fills`,
+         (s.max_drawdown_pct ?? 0) > 10 ? "warn" : ""),
+  ].join("");
+
+  // Equity chart
+  const ec = d.equity_curve || [];
+  const labels = ec.map(p => new Date(p.t).toLocaleTimeString());
+  const data = ec.map(p => p.equity);
+  if(chart){ chart.data.labels = labels;
+             chart.data.datasets[0].data = data; chart.update("none"); }
+  else if(ec.length){
+    chart = new Chart($("chart"), {
+      type:"line",
+      data:{labels, datasets:[{
+        data, borderColor:"#58a6ff", backgroundColor:"#58a6ff1a",
+        borderWidth:2, pointRadius:0, fill:true, tension:.25 }]},
+      options:{responsive:true, animation:false,
+        plugins:{legend:{display:false}},
+        scales:{
+          x:{grid:{color:"#21262d"},ticks:{color:"#8b949e",maxTicksLimit:8,font:{size:10}}},
+          y:{grid:{color:"#21262d"},ticks:{color:"#8b949e",font:{size:10},
+             callback:v=>"$"+v.toFixed(0)}}}}
+    });
+  }
+
+  // Tracked matches
+  $("tracked").innerHTML = table(
+    [{h:"Match"},{h:"Score"},{h:"Model",r:1},{h:"Market",r:1}],
+    (d.tracked||[]).map(t=>{
+      const gap = (t.model!=null && t.market_price!=null) ? t.model - t.market_price : null;
+      return `<tr>
+        <td class="txt">${t.outcomes?.join(" v ") ?? ""}
+          ${t.tradeable?"":'<span class="badge">late anchor</span>'}</td>
+        <td>${t.score||"—"}</td>
+        <td class="r">${t.model!=null?(t.model*100).toFixed(1)+"%":"—"}</td>
+        <td class="r ${gap!=null?cls(gap):""}">
+          ${t.market_price!=null?(t.market_price*100).toFixed(1)+"%":"—"}</td>
+      </tr>`;}),
+    "No live matches being tracked.");
+
+  // Positions
+  $("positions").innerHTML = table(
+    [{h:"Outcome"},{h:"Shares",r:1},{h:"Cost",r:1},{h:"Mark",r:1},{h:"P&L",r:1}],
+    (d.positions||[]).map(p=>`<tr>
+      <td class="txt">${p.label}</td>
+      <td class="r">${p.shares}</td>
+      <td class="r">${p.avg_cost.toFixed(3)}</td>
+      <td class="r">${p.mark.toFixed(3)}</td>
+      <td class="r ${cls(p.unrealized)}">${money(p.unrealized)}</td></tr>`),
+    "No open positions.");
+
+  // Trades
+  $("trades").innerHTML = table(
+    [{h:"Time"},{h:"Side"},{h:"Outcome"},{h:"Price",r:1},{h:"Size",r:1}],
+    (d.trades||[]).slice(0,15).map(t=>`<tr>
+      <td>${t.time}</td>
+      <td><span class="badge ${t.side.toLowerCase()}">${t.side}</span></td>
+      <td class="txt">${t.label}</td>
+      <td class="r">${t.price.toFixed(3)}</td>
+      <td class="r">${t.size}</td></tr>`),
+    "No fills yet.");
+
+  // Rejections
+  const rej = Object.entries(d.rejections||{});
+  const max = Math.max(1, ...rej.map(r=>r[1]));
+  $("rejections").innerHTML = rej.length ? rej.map(([k,v])=>`
+      <div style="margin-bottom:9px">
+        <div style="display:flex;justify-content:space-between;font-size:12px">
+          <span style="color:var(--dim)">${k}</span><span>${v}</span></div>
+        <div class="bar"><i style="width:${100*v/max}%"></i></div>
+      </div>`).join("")
+    : `<div class="empty">Nothing rejected yet.</div>`;
+
+  // Feeds
+  const f = d.feeds||{};
+  $("feeds").innerHTML = ["market","sports"].map(n=>{
+    const x = f[n]||{};
+    return `<div style="font-size:12px;margin-bottom:5px">
+      <span class="dot ${x.connected?"on":"off"}"></span>${n} feed
+      <span style="color:var(--dim)"> · ${x.connected?"connected":"disconnected"}
+      · ${x.reconnects||0} reconnects</span></div>`;
+  }).join("");
+}
+
+async function tick(){
+  try{
+    const r = await fetch("data.json?t=" + Date.now(), {cache:"no-store"});
+    if(!r.ok) throw new Error(r.status);
+    render(await r.json());
+  }catch(e){
+    $("meta").textContent =
+      "Waiting for data… start the bot with `python run.py live` (or `simulate`).";
+  }
+}
+tick();
+setInterval(tick, 5000);
+</script>
+</body>
+</html>
