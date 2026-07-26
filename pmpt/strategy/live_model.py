@@ -46,6 +46,10 @@ class StrategyConfig:
     reanchor_halflife_s: float = 900.0
     # Require the pre-match anchor to be captured before this many games are played.
     max_games_at_anchor: int = 2
+    # Refresh a pregame anchor when the winner price moves this much. This lets
+    # injury, withdrawal and lineup news already reflected by the market flow
+    # into the model without chasing headlines from unreliable sources.
+    pregame_reanchor_threshold: float = 0.01
     # Ignore markets whose pre-match price is this extreme: no room to be right.
     anchor_min_price: float = 0.08
     anchor_max_price: float = 0.92
@@ -291,6 +295,7 @@ class LiveModelStrategy:
         book: OrderBook,
         opened_ms: int | None = None,
         ts: int | None = None,
+        entry_fee_per_share: float = 0.0,
     ) -> tuple[bool, str]:
         """Should we close this position now?"""
         ts = ts or now_ms()
@@ -303,6 +308,11 @@ class LiveModelStrategy:
         if bid is None:
             return False, ""
         held_ms = max(0, ts - opened_ms) if opened_ms else 0
+        fee_rate = market.fee_rate if market.fees_enabled else 0.0
+        exit_fee_per_share = fee_rate * bid * (1.0 - bid)
+        net_profit_per_share = (
+            bid - exit_fee_per_share - avg_cost - max(0.0, entry_fee_per_share)
+        )
 
         if t is not None and t.ended:
             return (False, "") if cfg.hold_to_resolution else (True, "match ended")
@@ -325,15 +335,23 @@ class LiveModelStrategy:
         if bid <= avg_cost - cfg.stop_loss:
             return True, f"stop loss (bid {bid:.3f} vs cost {avg_cost:.3f})"
 
-        # A small bid-side profit is real enough for a scalping strategy. Take it.
-        if bid >= avg_cost + cfg.quick_take_profit:
-            return True, f"bank profit (bid {bid:.3f} vs cost {avg_cost:.3f})"
+        # Profit targets are after both the paid entry fee and the expected
+        # taker fee on this exit. Gross one-tick gains can otherwise be losses.
+        if net_profit_per_share >= cfg.quick_take_profit:
+            return True, (
+                f"bank profit net ({net_profit_per_share:.4f}/share after fees)"
+            )
 
-        if held_ms >= cfg.scratch_profit_after_ms and bid >= avg_cost + cfg.scratch_profit:
-            return True, f"scratch profit (bid {bid:.3f} vs cost {avg_cost:.3f})"
+        if (
+            held_ms >= cfg.scratch_profit_after_ms
+            and net_profit_per_share >= cfg.scratch_profit
+        ):
+            return True, (
+                f"scratch profit net ({net_profit_per_share:.4f}/share after fees)"
+            )
 
-        if held_ms >= cfg.max_hold_ms and bid >= avg_cost:
-            return True, f"time exit (bid {bid:.3f} vs cost {avg_cost:.3f})"
+        if held_ms >= cfg.max_hold_ms and net_profit_per_share >= 0:
+            return True, f"time exit ({net_profit_per_share:.4f}/share after fees)"
 
         # If the repriced model no longer supports the original entry, do not
         # wait for a full stop unless the book is already too far against us.

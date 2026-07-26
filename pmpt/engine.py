@@ -12,6 +12,7 @@ import asyncio
 import contextlib
 import logging
 import os
+from collections import deque
 from datetime import datetime, timezone
 
 from .config import AppConfig
@@ -24,6 +25,29 @@ from .models import Fill, Order, OrderBook, OrderType, Side, TradableMarket, now
 from .strategy.live_model import LiveModelStrategy
 
 log = logging.getLogger(__name__)
+
+
+def _balanced_markets(
+    markets: list[TradableMarket],
+    sports: list[str],
+    limit: int,
+) -> list[TradableMarket]:
+    """Round-robin sports so one busy league cannot consume the watchlist."""
+    buckets = {
+        sport: deque(m for m in markets if m.sport == sport)
+        for sport in sports
+    }
+    selected: list[TradableMarket] = []
+    while len(selected) < limit:
+        added = False
+        for sport in sports:
+            bucket = buckets[sport]
+            if bucket and len(selected) < limit:
+                selected.append(bucket.popleft())
+                added = True
+        if not added:
+            break
+    return selected
 
 
 class TradingEngine:
@@ -113,16 +137,40 @@ class TradingEngine:
     # -- discovery ---------------------------------------------------------
 
     async def _discover(self) -> None:
+        previous = dict(self.gamma.markets)
         loop = asyncio.get_running_loop()
         markets = await loop.run_in_executor(
             None, lambda: self.gamma.refresh(only_live=self.cfg.run.live_only)
         )
-        markets = markets[: self.cfg.run.max_tracked_markets]
+
+        # Never rotate a market out while it carries risk or a working order.
+        pinned: list[TradableMarket] = []
+        for m in previous.values():
+            exposed = any(
+                (
+                    self.portfolio.positions.get(token)
+                    and self.portfolio.positions[token].shares > 0
+                )
+                or self.broker.live_size(token, Side.BUY) > 0
+                or self.broker.live_size(token, Side.SELL) > 0
+                for token in m.token_ids
+            )
+            if exposed:
+                pinned.append(m)
+
+        pinned_ids = {m.market_id for m in pinned}
+        available = [m for m in markets if m.market_id not in pinned_ids]
+        slots = max(0, self.cfg.run.max_tracked_markets - len(pinned))
+        markets = pinned + _balanced_markets(
+            available,
+            self.cfg.run.sports,
+            slots,
+        )
+        self.gamma.activate(markets)
 
         for m in markets:
-            t = self.strategy.trackers.get(m.market_id)
-            if t is not None and t.anchor_prob is not None:
-                continue
+            live_fee = m.fee_rate if m.fees_enabled else 0.0
+            self.broker.set_market_fees(m.token_ids, live_fee)
             ev = self.gamma.event_for_market(m)
             if ev is None:
                 continue
@@ -132,6 +180,19 @@ class TradingEngine:
             if price is None:
                 continue
             games = self._games_played(ev)
+            t = self.strategy.trackers.get(m.market_id)
+            if t is not None and t.anchor_prob is not None:
+                # Keep following the pregame winner line. Material repricing is
+                # usually the cleanest available signal that news changed.
+                moved = abs(price - t.anchor_prob)
+                if (
+                    not bool(ev.get("live"))
+                    and not t.live
+                    and games == 0
+                    and moved >= self.cfg.strategy.pregame_reanchor_threshold
+                ):
+                    self.strategy.set_anchor(m, price, games_played=0)
+                continue
             self.strategy.set_anchor(m, price, games_played=games)
 
         if self.market_feed is not None:
@@ -217,6 +278,17 @@ class TradingEngine:
         )
 
         for m in markets:
+            tracker = self.strategy.trackers.get(m.market_id)
+            if (
+                tracker is not None
+                and live
+                and not tracker.live
+                and self._games_played({"score": score})
+                > self.cfg.strategy.max_games_at_anchor
+            ):
+                # If the first live score is already underway, the market price
+                # was not a clean pregame anchor. Keep observing, but never bet.
+                tracker.anchored_cleanly = False
             self.strategy.on_score(m, score, period, live, ended)
             if ended:
                 await self._flatten(m, "match ended")
@@ -272,7 +344,13 @@ class TradingEngine:
             if b is None:
                 continue
             should, why = self.strategy.exit_signal(
-                market, token, pos.avg_cost, b, pos.opened_ms, ts
+                market,
+                token,
+                pos.avg_cost,
+                b,
+                opened_ms=pos.opened_ms,
+                ts=ts,
+                entry_fee_per_share=pos.fees_paid / max(pos.shares, 1e-9),
             )
             if should:
                 await self._close(market, token, why)
@@ -285,10 +363,19 @@ class TradingEngine:
         book = books.get(signal.token_id)
         if book is None:
             return
+        if any(
+            self.broker.live_size(token, Side.BUY) > 0
+            for token in market.token_ids
+        ):
+            key = "entry order pending"
+            self.rejections[key] = self.rejections.get(key, 0) + 1
+            return
+        passive_entry = self.cfg.broker.passive_entries
         depth = book.depth(Side.BUY, max_price=signal.market_price + 0.02)
         ok, why = self.risk.approve(
             signal, market, self.portfolio, marks,
             book_age_ms=book.age_ms(ts), spread=book.spread, depth=depth, ts_ms=ts,
+            taker_legs=1 if passive_entry else 2,
         )
         if not ok:
             self.rejections[why.split(" (")[0]] = self.rejections.get(why.split(" (")[0], 0) + 1
@@ -302,14 +389,21 @@ class TradingEngine:
         if shares <= 0:
             return
 
+        if passive_entry:
+            if book.best_bid is None:
+                return
+            entry_price = book.best_bid
+            order_type = OrderType.PASSIVE
+        else:
+            entry_price = signal.market_price + market.tick_size
+            order_type = OrderType.MARKETABLE
+
         order = Order(
             token_id=signal.token_id,
             side=Side.BUY,
             size=shares,
-            # Allow one tick of slip, no more. A wider limit is how you get filled
-            # at a price that erases the edge you were trying to capture.
-            limit_price=signal.market_price + market.tick_size,
-            order_type=OrderType.MARKETABLE,
+            limit_price=entry_price,
+            order_type=order_type,
             market_id=market.market_id,
             reason=signal.reason,
         )
@@ -317,7 +411,8 @@ class TradingEngine:
         self.risk.record_entry(market.market_id, ts)
         self.orders_sent += 1
         log.info(
-            "ORDER BUY %.0f %s @<=%.4f | edge=%+.3f conf=%.2f | %s",
+            "ORDER %s BUY %.0f %s @%.4f | edge=%+.3f conf=%.2f | %s",
+            order_type.value,
             shares, market.outcomes[market.index_of(signal.token_id)],
             order.limit_price, signal.edge, signal.confidence, signal.reason,
         )
@@ -347,6 +442,8 @@ class TradingEngine:
                  market.outcomes[market.index_of(token_id)], why)
 
     async def _flatten(self, market: TradableMarket, why: str) -> None:
+        for token in market.token_ids:
+            self.broker.cancel_all(token, Side.BUY)
         if self.cfg.strategy.hold_to_resolution:
             return
         for token in market.token_ids:

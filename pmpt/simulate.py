@@ -224,9 +224,11 @@ def run_simulation(
     cfg = cfg or SimConfig()
     rng = random.Random(cfg.seed)
 
-    broker = PaperBroker(broker_cfg or BrokerConfig(seed=cfg.seed))
+    broker_config = broker_cfg or BrokerConfig(seed=cfg.seed)
+    risk_config = risk_cfg or RiskConfig()
+    broker = PaperBroker(broker_config)
     portfolio = Portfolio(cfg.starting_cash)
-    risk = RiskManager(risk_cfg or RiskConfig())
+    risk = RiskManager(risk_config)
     strategy = LiveModelStrategy(strategy_cfg or StrategyConfig())
 
     ts = 1_700_000_000_000
@@ -247,6 +249,13 @@ def run_simulation(
             min_order_size=5,
             sport=cfg.sport,
             best_of=cfg.best_of,
+            fees_enabled=broker_config.taker_fee_rate > 0,
+            fee_rate=broker_config.taker_fee_rate,
+        )
+        broker.set_market_fees(
+            market.token_ids,
+            market.fee_rate if market.fees_enabled else 0.0,
+            broker_config.maker_fee_rate,
         )
 
         # True strength, and the market's (correct) pre-match view of it.
@@ -305,7 +314,13 @@ def run_simulation(
                     if pos is None or pos.shares <= 0:
                         continue
                     should, why = strategy.exit_signal(
-                        market, token, pos.avg_cost, books[token], pos.opened_ms, ts
+                        market,
+                        token,
+                        pos.avg_cost,
+                        books[token],
+                        opened_ms=pos.opened_ms,
+                        ts=ts,
+                        entry_fee_per_share=pos.fees_paid / max(pos.shares, 1e-9),
                     )
                     if should and books[token].best_bid:
                         outstanding_sell = broker.live_size(token, Side.SELL)
@@ -324,9 +339,25 @@ def run_simulation(
                     continue
                 signals += 1
                 bk = books[sig.token_id]
+                if any(
+                    broker.live_size(token, Side.BUY) > 0
+                    for token in market.token_ids
+                ):
+                    key = "entry order pending"
+                    rejections[key] = rejections.get(key, 0) + 1
+                    continue
+                passive_entry = broker_config.passive_entries
                 depth = bk.depth(Side.BUY, max_price=sig.market_price + 0.02)
                 ok, why = risk.approve(
-                    sig, market, portfolio, marks, bk.age_ms(ts), bk.spread, depth, ts
+                    sig,
+                    market,
+                    portfolio,
+                    marks,
+                    bk.age_ms(ts),
+                    bk.spread,
+                    depth,
+                    ts,
+                    taker_legs=1 if passive_entry else 2,
                 )
                 if not ok:
                     key = why.split(" (")[0]
@@ -336,10 +367,18 @@ def run_simulation(
                 shares = risk.size_order(sig, market, portfolio, marks, fillable)
                 if shares <= 0:
                     continue
+                entry_price = (
+                    bk.best_bid
+                    if passive_entry and bk.best_bid is not None
+                    else sig.market_price + market.tick_size
+                )
                 broker.submit(Order(
                     token_id=sig.token_id, side=Side.BUY, size=shares,
-                    limit_price=sig.market_price + market.tick_size,
-                    order_type=OrderType.MARKETABLE, market_id=market.market_id,
+                    limit_price=entry_price,
+                    order_type=(
+                        OrderType.PASSIVE if passive_entry else OrderType.MARKETABLE
+                    ),
+                    market_id=market.market_id,
                     reason=sig.reason,
                 ), ts)
                 risk.record_entry(market.market_id, ts)

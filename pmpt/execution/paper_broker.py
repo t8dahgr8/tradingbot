@@ -47,10 +47,13 @@ class BrokerConfig:
     latency_ms: int = 250
     # Extra random jitter on top of the base latency.
     latency_jitter_ms: int = 100
-    # Taker fee rate. Polymarket sports markets currently run with fees disabled,
-    # but do not build a strategy that only works at zero fees.
+    # Fallback fee rates for simulation. Live markets override these from Gamma's
+    # per-market fee schedule.
     taker_fee_rate: float = 0.0
     maker_fee_rate: float = 0.0
+    # When enabled, rest at the best bid for entries and pay only the exit taker
+    # fee. This also exposes the strategy to passive-order adverse selection.
+    passive_entries: bool = False
     # Refuse to take more than this share of any single price level, on the theory
     # that other traders are competing for the same liquidity.
     max_level_participation: float = 0.5
@@ -64,14 +67,14 @@ class BrokerConfig:
 
 
 def polymarket_fee(price: float, shares: float, rate: float) -> float:
-    """Polymarket's fee shape: proportional to the cheaper side of the market.
+    """Polymarket's fee curve: shares * rate * price * (1 - price).
 
     A trade at 0.02 is charged far less than a trade at 0.50, which is why
     long-shot scalping looks cheaper than it is on a percentage basis.
     """
     if rate <= 0:
         return 0.0
-    return rate * min(price, 1.0 - price) * shares
+    return shares * rate * price * (1.0 - price)
 
 
 class PaperBroker:
@@ -85,11 +88,29 @@ class PaperBroker:
         self.fills: list[Fill] = []
         self._books: dict[str, OrderBook] = {}
         self._arrival: dict[str, int] = {}  # order_id -> arrival timestamp
+        self._taker_fee_rates: dict[str, float] = {}
+        self._maker_fee_rates: dict[str, float] = {}
 
     # -- plumbing ----------------------------------------------------------
 
     def book(self, token_id: str) -> OrderBook | None:
         return self._books.get(token_id)
+
+    def set_market_fees(
+        self,
+        token_ids: tuple[str, ...] | list[str],
+        taker_rate: float,
+        maker_rate: float = 0.0,
+    ) -> None:
+        """Apply Gamma's fee schedule to every outcome token in a market."""
+        for token_id in token_ids:
+            self._taker_fee_rates[token_id] = max(0.0, float(taker_rate))
+            self._maker_fee_rates[token_id] = max(0.0, float(maker_rate))
+
+    def _fee_rate(self, token_id: str, maker: bool) -> float:
+        rates = self._maker_fee_rates if maker else self._taker_fee_rates
+        fallback = self.cfg.maker_fee_rate if maker else self.cfg.taker_fee_rate
+        return rates.get(token_id, fallback)
 
     def _latency(self) -> int:
         j = self.cfg.latency_jitter_ms
@@ -222,7 +243,9 @@ class PaperBroker:
             qty = min(vol, o.remaining)
             if qty <= 0:
                 continue
-            fee = polymarket_fee(o.limit_price, qty, self.cfg.maker_fee_rate)
+            fee = polymarket_fee(
+                o.limit_price, qty, self._fee_rate(o.token_id, maker=True)
+            )
             f = Fill(o.order_id, o.token_id, o.side, o.limit_price, qty, fee, ts, "maker")
             o.apply(f)
             out.append(f)
@@ -274,7 +297,9 @@ class PaperBroker:
             return []
 
         avg = notional / got
-        fee = polymarket_fee(avg, got, self.cfg.taker_fee_rate)
+        fee = polymarket_fee(
+            avg, got, self._fee_rate(order.token_id, maker=False)
+        )
         f = Fill(order.order_id, order.token_id, order.side, avg, got, fee, ts, "taker")
         order.apply(f)
         if order.is_live:
@@ -300,7 +325,9 @@ class PaperBroker:
             # be filled at our (now stale) price. That is adverse selection, and
             # it should show up in the P&L.
             qty = o.remaining
-            fee = polymarket_fee(o.limit_price, qty, self.cfg.maker_fee_rate)
+            fee = polymarket_fee(
+                o.limit_price, qty, self._fee_rate(o.token_id, maker=True)
+            )
             f = Fill(o.order_id, o.token_id, o.side, o.limit_price, qty, fee, ts, "maker")
             o.apply(f)
             out.append(f)

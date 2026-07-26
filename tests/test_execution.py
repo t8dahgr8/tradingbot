@@ -77,8 +77,11 @@ class TestOrderBook(unittest.TestCase):
 
 
 class TestFees(unittest.TestCase):
-    def test_fee_is_proportional_to_cheaper_side(self):
-        # A 0.90 trade is charged on 0.10, the same as a 0.10 trade.
+    def test_fee_matches_current_polymarket_curve(self):
+        self.assertAlmostEqual(polymarket_fee(0.50, 100, 0.03), 0.75)
+        self.assertAlmostEqual(polymarket_fee(0.20, 100, 0.03), 0.48)
+
+    def test_fee_curve_is_symmetric(self):
         self.assertAlmostEqual(
             polymarket_fee(0.90, 100, 0.05), polymarket_fee(0.10, 100, 0.05)
         )
@@ -110,6 +113,17 @@ class TestPaperBroker(unittest.TestCase):
         fills = self.b.on_book(book(ts=1300), ts_ms=1300)
         self.assertEqual(len(fills), 1)
         self.assertEqual(o.status, OrderStatus.FILLED)
+
+    def test_live_market_fee_overrides_simulation_fallback(self):
+        self.b.set_market_fees((TOK,), taker_rate=0.05)
+        self.b.on_book(book(ts=1000), ts_ms=1000)
+        o = Order(TOK, Side.BUY, 10, 0.55, OrderType.MARKETABLE)
+        self.b.submit(o, ts_ms=1000)
+        fill = self.b.on_book(book(ts=1300), ts_ms=1300)[0]
+        self.assertAlmostEqual(
+            fill.fee,
+            polymarket_fee(fill.price, fill.size, 0.05),
+        )
 
     def test_fills_against_the_later_book_not_the_earlier_one(self):
         """The price moving during the latency window must hurt us."""
@@ -343,6 +357,23 @@ class TestRisk(unittest.TestCase):
     def test_small_edge_rejected(self):
         ok, _ = self.approve(self.sig(price=0.50, fair=0.51))
         self.assertFalse(ok)
+
+    def test_passive_entry_only_pays_one_expected_taker_leg(self):
+        fee_market = market(fees_enabled=True, fee_rate=0.05)
+        rm = RiskManager(RiskConfig(
+            min_edge=0.006,
+            assumed_slippage=0.0,
+            min_confidence=0.0,
+            cooldown_ms=0,
+        ))
+        signal = self.sig(price=0.50, fair=0.53)
+        common = (signal, fee_market, self.pf, {}, 0, 0.02, 500.0, 10_000)
+
+        marketable_ok, _ = rm.approve(*common, taker_legs=2)
+        passive_ok, passive_why = rm.approve(*common, taker_legs=1)
+
+        self.assertFalse(marketable_ok)
+        self.assertTrue(passive_ok, passive_why)
 
     def test_stale_book_rejected(self):
         ok, why = self.approve(self.sig(), book_age_ms=60_000)

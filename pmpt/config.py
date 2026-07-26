@@ -18,9 +18,9 @@ from .strategy.live_model import StrategyConfig
 class RunConfig:
     starting_cash: float = 100.0
     sports: list[str] = field(default_factory=lambda: ["tennis"])
-    # Only trade matches that are actually in progress. Pre-match markets are
-    # where the sharp money is and where this strategy has no edge at all.
-    live_only: bool = True
+    # Discover pregame markets so the model captures a clean winner-price anchor.
+    # Signal generation still requires a live score, so this does not trade pregame.
+    live_only: bool = False
     discovery_interval_s: int = 180
     mark_interval_s: int = 15
     status_interval_s: int = 60
