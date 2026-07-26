@@ -245,6 +245,50 @@ class TestHftMarketMaker(unittest.TestCase):
         self.assertAlmostEqual(self.portfolio.fees_paid, 0.0)
         self.assertNotIn(T0, self.portfolio.positions)
 
+    def test_eighty_two_cent_fill_targets_eighty_four_cents(self):
+        self.portfolio.apply_fill(
+            Fill("buy", T0, Side.BUY, 0.82, 5, timestamp_ms=10_000),
+            market_id=self.market.market_id,
+        )
+        value = book(T0, bid=0.81, ask=0.83, ts=10_001)
+
+        intent = self.mm._sell_intent(
+            self.market,
+            value,
+            self.portfolio.positions[T0],
+            10_001,
+        )
+
+        self.assertIsNotNone(intent)
+        self.assertEqual(intent.price, 0.84)
+
+    def test_taker_profit_exit_accounts_for_fee_and_roi(self):
+        self.market.fees_enabled = True
+        self.market.fee_rate = 0.05
+        self.portfolio.apply_fill(
+            Fill("buy", T0, Side.BUY, 0.82, 5, timestamp_ms=10_000),
+            market_id=self.market.market_id,
+        )
+        pos = self.portfolio.positions[T0]
+
+        too_small = self.mm.force_exit_reason(
+            self.market,
+            T0,
+            pos,
+            book(T0, bid=0.84, ask=0.86, ts=11_000),
+            11_000,
+        )
+        enough = self.mm.force_exit_reason(
+            self.market,
+            T0,
+            pos,
+            book(T0, bid=0.85, ask=0.87, ts=11_000),
+            11_000,
+        )
+
+        self.assertEqual(too_small, "")
+        self.assertIn("take profit", enough)
+
 
 class TestHftQuoteReconciliation(unittest.TestCase):
     def setUp(self):

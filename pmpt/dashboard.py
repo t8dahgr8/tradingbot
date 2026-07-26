@@ -100,9 +100,12 @@ def build_snapshot(engine) -> dict:
             trade_status = "ready"
         tracked.append({
             "market": m.question,
+            "sport": m.sport,
+            "league": m.league,
             "outcomes": list(m.outcomes),
             "score": t.last_score,
             "period": t.last_period,
+            "elapsed": t.last_elapsed,
             "model": round(t.fair_value, 4) if t.fair_value is not None else None,
             "market_price": round(b0.mid, 4) if (b0 and b0.mid is not None) else None,
             "anchor": round(t.anchor_prob, 4) if t.anchor_prob is not None else None,

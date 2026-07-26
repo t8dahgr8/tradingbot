@@ -6,7 +6,7 @@ Polymarket paper trader -- CLI.
     python run.py simulate --sweep          sweep market speed to see where edge dies
     python run.py live                      paper trade real markets in real time
     python run.py dashboard                 web UI at http://127.0.0.1:8000
-    python run.py markets                   list tradeable tennis markets right now
+    python run.py markets                   list tradeable sports markets right now
     python run.py report                    print the saved portfolio
 
 Nothing here can place a real order. There is no wallet, no private key, and no
@@ -104,7 +104,8 @@ def cmd_markets(args: argparse.Namespace) -> int:
         ev = gc.event_for_market(m) or {}
         state = "LIVE" if ev.get("live") else ("ended" if ev.get("ended") else "pre")
         score = ev.get("score") or "-"
-        print(f"  [{state:>5}] {m.outcomes[0]} vs {m.outcomes[1]}")
+        print(f"  [{state:>5}] [{m.sport}/{m.league or '-'}] "
+              f"{m.outcomes[0]} vs {m.outcomes[1]}")
         print(f"          {m.question[:70]}")
         print(f"          score={score!r:<24} bo{m.best_of}  tick={m.tick_size} "
               f"min={m.min_order_size:g}")
@@ -190,7 +191,7 @@ def cmd_dashboard(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="run.py", description="Polymarket paper trader (tennis / table tennis)"
+        prog="run.py", description="Polymarket multi-sport paper trader"
     )
     p.add_argument("--config", default="config.yaml")
     p.add_argument("--log-level", default=None)
@@ -218,7 +219,19 @@ def build_parser() -> argparse.ArgumentParser:
     lv = sub.add_parser("live", help="paper trade live markets")
     lv.add_argument("--cash", type=float, default=None)
     lv.add_argument("--minutes", type=float, default=None, help="stop after N minutes")
-    lv.add_argument("--sport", default=None, choices=["tennis", "table_tennis"])
+    lv.add_argument(
+        "--sport",
+        default=None,
+        choices=[
+            "basketball",
+            "football",
+            "baseball",
+            "hockey",
+            "soccer",
+            "tennis",
+            "table_tennis",
+        ],
+    )
     lv.add_argument("--mode", default=None, choices=["scalp", "hft"])
     lv.add_argument(
         "--publish-github",

@@ -3,7 +3,9 @@
 
 run:
   starting_cash: 100.0
-  sports: [table_tennis, tennis]
+  # Score-supported match winners only. Cricket, motorsports, esports, golf,
+  # and combat sports are deliberately excluded.
+  sports: [basketball, football, baseball, hockey, soccer, table_tennis, tennis]
   mode: hft                     # passive high-frequency paper market maker
   live_only: false            # discover pregame anchors; orders still require live scores
   discovery_interval_s: 60
@@ -12,7 +14,7 @@ run:
   state_dir: state
   log_level: INFO
   max_runtime_s: 0            # 0 = run until Ctrl-C
-  max_tracked_markets: 120
+  max_tracked_markets: 140
   github_live_enabled: true   # public Pages dashboard follows this process
   github_live_interval_s: 30
   github_live_remote: origin
@@ -69,7 +71,9 @@ strategy:
   anchor_max_price: 0.92
   take_profit_edge: 0.005
   quick_take_profit: 0.004    # net per share after entry and exit fees
+  quick_take_profit_roi: 0.02 # also require 2% net return on cost
   scratch_profit: 0.001
+  scratch_profit_roi: 0.005
   scratch_profit_after_ms: 10000
   max_hold_ms: 90000
   exit_edge_buffer: 0.003
@@ -88,6 +92,9 @@ market_maker:
   max_spread: 0.06
   min_quote_edge: 0.003
   min_exit_profit: 0.004
+  min_exit_roi: 0.02          # .82 maker fill targets about .84
+  scratch_exit_profit: 0.001
+  scratch_exit_roi: 0.005
   inventory_skew_ticks: 1.0
   soft_inventory_age_ms: 30000
   hard_inventory_age_ms: 90000

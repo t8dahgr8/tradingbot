@@ -249,6 +249,10 @@ class TradableMarket:
     min_order_size: float = 5.0
     accepting_orders: bool = True
     sport: str = "tennis"
+    league: str = ""
+    # The sports score stream is always home-away.  This says what outcome 0
+    # represents so team-sport models do not accidentally reverse the score.
+    outcome0_role: str = "home"       # "home" | "away" | "draw"
     game_id: int | None = None
     event_slug: str = ""
     best_of: int = 3

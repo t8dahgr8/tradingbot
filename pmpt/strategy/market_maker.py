@@ -28,6 +28,9 @@ class MarketMakerConfig:
     max_spread: float = 0.06
     min_quote_edge: float = 0.003
     min_exit_profit: float = 0.004
+    min_exit_roi: float = 0.02
+    scratch_exit_profit: float = 0.001
+    scratch_exit_roi: float = 0.005
     inventory_skew_ticks: float = 1.0
     soft_inventory_age_ms: int = 30_000
     hard_inventory_age_ms: int = 90_000
@@ -310,12 +313,20 @@ class HftMarketMaker:
             return None
 
         age_ms = max(0, ts_ms - pos.opened_ms)
-        target = pos.avg_cost + self.cfg.min_exit_profit
+        entry_fee_per_share = pos.fees_paid / max(pos.shares, 1e-9)
+        desired_net = max(
+            self.cfg.min_exit_profit,
+            pos.avg_cost * max(0.0, self.cfg.min_exit_roi),
+        )
         if age_ms >= self.cfg.soft_inventory_age_ms:
-            target = min(target, ask)
+            desired_net = max(
+                self.cfg.scratch_exit_profit,
+                pos.avg_cost * max(0.0, self.cfg.scratch_exit_roi),
+            )
+        target = pos.avg_cost + entry_fee_per_share + desired_net
         price = max(bid + book.tick_size, _ceil_tick(target, book.tick_size))
         price = min(price, 1.0 - book.tick_size)
-        if price <= bid + 1e-9:
+        if price <= bid + 1e-9 or price + 1e-9 < target:
             return None
         size = min(available, self.cfg.quote_size_shares)
         return QuoteIntent(
@@ -323,7 +334,10 @@ class HftMarketMaker:
             side=Side.SELL,
             price=price,
             size=size,
-            reason=f"inventory offer age={age_ms}ms",
+            reason=(
+                f"inventory offer target={100 * desired_net / max(pos.avg_cost, 1e-9):.2f}% "
+                f"net age={age_ms}ms"
+            ),
         )
 
     def force_exit_reason(
@@ -340,6 +354,33 @@ class HftMarketMaker:
         age_ms = max(0, ts_ms - pos.opened_ms)
         if bid <= pos.avg_cost - self.cfg.hard_stop:
             return f"HFT inventory stop (bid {bid:.3f} vs cost {pos.avg_cost:.3f})"
+
+        entry_fee_per_share = pos.fees_paid / max(pos.shares, 1e-9)
+        exit_fee_per_share = (
+            market.fee_rate * bid * (1.0 - bid)
+            if market.fees_enabled
+            else 0.0
+        )
+        net_profit = bid - exit_fee_per_share - pos.avg_cost - entry_fee_per_share
+        profit_target = max(
+            self.cfg.min_exit_profit,
+            pos.avg_cost * max(0.0, self.cfg.min_exit_roi),
+        )
+        if net_profit + 1e-9 >= profit_target:
+            return (
+                f"HFT take profit ({net_profit:.4f}/share, "
+                f"{100 * net_profit / max(pos.avg_cost, 1e-9):.2f}% net ROI)"
+            )
+
+        scratch_target = max(
+            self.cfg.scratch_exit_profit,
+            pos.avg_cost * max(0.0, self.cfg.scratch_exit_roi),
+        )
+        if age_ms >= self.cfg.soft_inventory_age_ms and net_profit + 1e-9 >= scratch_target:
+            return (
+                f"HFT scratch profit ({net_profit:.4f}/share, "
+                f"{100 * net_profit / max(pos.avg_cost, 1e-9):.2f}% net ROI)"
+            )
         if age_ms >= self.cfg.hard_inventory_age_ms:
             return f"HFT hard inventory timeout ({age_ms}ms)"
         return ""

@@ -243,9 +243,11 @@ function render(d, online){
         ? t.model - t.market_price
         : null;
       return `<tr>
-        <td class="txt">${esc(t.outcomes?.join(" v ") ?? "")}
+        <td class="txt"><span class="badge">${esc(t.league || t.sport || "sport")}</span>
+          ${esc(t.outcomes?.join(" v ") ?? "")}
           ${t.tradeable ? "" : `<span class="badge">${esc(t.trade_status || "paused")}</span>`}</td>
-        <td>${esc(t.score || "-")}</td>
+        <td>${esc(t.score || "-")}
+          ${t.period ? `<span class="muted">${esc(t.period)} ${esc(t.elapsed || "")}</span>` : ""}</td>
         <td class="r">${t.model != null ? (t.model * 100).toFixed(1) + "%" : "-"}</td>
         <td class="r ${gap != null ? cls(gap) : ""}">
           ${t.market_price != null ? (t.market_price * 100).toFixed(1) + "%" : "-"}</td>

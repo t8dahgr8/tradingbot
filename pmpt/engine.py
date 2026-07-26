@@ -22,6 +22,7 @@ from .execution.paper_broker import PaperBroker
 from .execution.portfolio import Portfolio
 from .execution.risk import RiskManager
 from .models import Fill, Order, OrderBook, OrderType, Side, TradableMarket, now_ms
+from .quant import team_sports as team
 from .strategy.live_model import LiveModelStrategy
 from .strategy.market_maker import HftMarketMaker, QuoteIntent
 
@@ -200,7 +201,12 @@ class TradingEngine:
             price = self._gamma_price(ev, m)
             if price is None:
                 continue
-            games = self._games_played(ev)
+            games = self._progress_units(
+                m,
+                str(ev.get("score") or ""),
+                str(ev.get("period") or ""),
+                str(ev.get("elapsed") or ""),
+            )
             t = self.strategy.trackers.get(m.market_id)
             if t is not None and t.anchor_prob is not None:
                 # Keep following the pregame winner line. Material repricing is
@@ -213,8 +219,29 @@ class TradingEngine:
                     and moved >= self.cfg.strategy.pregame_reanchor_threshold
                 ):
                     self.strategy.set_anchor(m, price, games_played=0)
-                continue
-            self.strategy.set_anchor(m, price, games_played=games)
+            else:
+                self.strategy.set_anchor(m, price, games_played=games)
+
+            # The sports socket emits changes, not a guaranteed full snapshot on
+            # connect. Seed an already-live game from Gamma so the first fresh
+            # CLOB book can calibrate a late join. This is calibration only:
+            # wait for the next sports update before allowing a new bid.
+            t = self.strategy.trackers.get(m.market_id)
+            if (
+                t is not None
+                and bool(ev.get("live"))
+                and not t.live
+                and str(ev.get("score") or "").strip()
+            ):
+                self.strategy.on_score(
+                    m,
+                    str(ev.get("score") or ""),
+                    str(ev.get("period") or ""),
+                    live=True,
+                    ended=bool(ev.get("ended")),
+                    elapsed=str(ev.get("elapsed") or ""),
+                )
+                t.last_score_change_ms = 0
 
         if self.market_feed is not None:
             await self.market_feed.subscribe(
@@ -254,6 +281,33 @@ class TradingEngine:
                 except ValueError:
                     continue
         return total
+
+    @staticmethod
+    def _progress_units(
+        market: TradableMarket,
+        score: str,
+        period: str = "",
+        elapsed: str = "",
+    ) -> int:
+        """Comparable late-join guard for racket and clock-based sports."""
+        if not team.is_team_sport(market.sport):
+            return TradingEngine._games_played({"score": score})
+        if not str(score or "").strip():
+            return 0
+        state = team.parse_team_score(
+            market.sport,
+            market.league,
+            score,
+            period,
+            elapsed,
+        )
+        if not state.valid:
+            return 10**6
+        started = (
+            state.home_score + state.away_score > 0
+            or state.progress > 0.02
+        )
+        return 10**6 if started else 0
 
     async def _discovery_loop(self) -> None:
         while not self._stop.is_set():
@@ -299,11 +353,13 @@ class TradingEngine:
 
         score = str(game.get("score") or "")
         period = str(game.get("period") or "")
+        elapsed = str(game.get("elapsed") or "")
         live = bool(game.get("live"))
         ended = bool(game.get("ended")) or str(game.get("status", "")).lower() in (
             "finished", "final", "cancelled", "canceled", "postponed"
         )
 
+        changed_by_market: dict[str, bool] = {}
         for m in markets:
             tracker = self.strategy.trackers.get(m.market_id)
             changed = (
@@ -311,6 +367,7 @@ class TradingEngine:
                 or score != tracker.last_score
                 or period != tracker.last_period
             )
+            changed_by_market[m.market_id] = changed
             if self.mode == "hft" and changed:
                 cancelled = self._cancel_hft_quotes(m)
                 if cancelled:
@@ -320,7 +377,7 @@ class TradingEngine:
                 tracker is not None
                 and live
                 and not tracker.live
-                and self._games_played({"score": score})
+                and self._progress_units(m, score, period, elapsed)
                 > self.cfg.strategy.max_games_at_anchor
             ):
                 # Infer strength from the current winner price *at this score*.
@@ -333,13 +390,30 @@ class TradingEngine:
                     price,
                     score,
                     period,
+                    elapsed=elapsed,
                 ):
                     tracker.anchored_cleanly = False
-            self.strategy.on_score(m, score, period, live, ended)
+            self.strategy.on_score(
+                m,
+                score,
+                period,
+                live,
+                ended,
+                elapsed=elapsed,
+            )
+
+        # Soccer moneylines are three separate binary markets. Reprice all
+        # three, then normalize home/draw/away before evaluating any quote.
+        self.strategy.normalize_event(markets)
+
+        for m in markets:
             if ended:
                 await self._flatten(m, "match ended")
             else:
-                await self._evaluate(m, force_hft=changed)
+                await self._evaluate(
+                    m,
+                    force_hft=changed_by_market.get(m.market_id, False),
+                )
 
     def _try_late_anchor_from_book(self, market: TradableMarket) -> bool:
         tracker = self.strategy.trackers.get(market.market_id)
@@ -348,7 +422,12 @@ class TradingEngine:
             or not tracker.live
             or tracker.ended
             or tracker.anchored_cleanly
-            or self._games_played({"score": tracker.last_score})
+            or self._progress_units(
+                market,
+                tracker.last_score,
+                tracker.last_period,
+                tracker.last_elapsed,
+            )
             <= self.cfg.strategy.max_games_at_anchor
         ):
             return False
@@ -360,6 +439,7 @@ class TradingEngine:
             book.mid,
             tracker.last_score,
             tracker.last_period,
+            elapsed=tracker.last_elapsed,
         )
 
     def _book_fill(self, fill: Fill) -> None:

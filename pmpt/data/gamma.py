@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import ssl
 import urllib.error
 import urllib.parse
@@ -26,10 +27,16 @@ log = logging.getLogger(__name__)
 
 GAMMA = "https://gamma-api.polymarket.com"
 
-# Verified against the live tags endpoint.
+# Broad sport tags. Football needs two tags because NFL and college football do
+# not currently share one public parent tag.
 TAG_IDS = {
-    "tennis": 864,
-    "table_tennis": 103767,
+    "tennis": (864,),
+    "table_tennis": (103767,),
+    "basketball": (28,),
+    "football": (450, 100351),
+    "baseball": (678,),
+    "hockey": (899,),
+    "soccer": (100350,),
 }
 
 USER_AGENT = "pmpt-paper-trader/1.0 (+research)"
@@ -90,14 +97,90 @@ def _gamma_time(value: datetime) -> str:
 
 
 def _event_start(event: dict) -> datetime | None:
-    raw = event.get("startDate")
-    if not raw:
+    """Return the scheduled game time, not the market creation timestamp."""
+    candidates = [
+        event.get("startTime"),
+        event.get("eventStartTime"),
+    ]
+    candidates.extend(
+        raw.get("gameStartTime")
+        for raw in (event.get("markets") or [])
+        if raw.get("gameStartTime")
+    )
+    # Older event payloads used startDate for the actual start time.
+    candidates.append(event.get("startDate"))
+    for raw in candidates:
+        if not raw:
+            continue
+        try:
+            value = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+            return (
+                value
+                if value.tzinfo is not None
+                else value.replace(tzinfo=timezone.utc)
+            )
+        except (TypeError, ValueError):
+            continue
+    return None
+
+
+_AWAY_FIRST_LEAGUES = {
+    "nba",
+    "wnba",
+    "nfl",
+    "cfb",
+    "mlb",
+    "kbo",
+    "nhl",
+}
+
+
+def _league_from_event(event: dict) -> str:
+    value = str(event.get("seriesSlug") or "").strip().lower()
+    if value:
+        return value
+    slug = str(event.get("slug") or "").strip().lower()
+    return slug.split("-", 1)[0] if slug else ""
+
+
+def _normal_name(value: str) -> str:
+    return "".join(ch for ch in value.lower() if ch.isalnum())
+
+
+def _event_participants(event: dict) -> tuple[str, str] | None:
+    title = str(event.get("title") or "")
+    parts = re.split(r"\s+vs\.?\s+", title, maxsplit=1, flags=re.IGNORECASE)
+    if len(parts) != 2:
         return None
-    try:
-        value = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
-        return value if value.tzinfo is not None else value.replace(tzinfo=timezone.utc)
-    except (TypeError, ValueError):
+    return parts[0].strip(), parts[1].split(" - ", 1)[0].strip()
+
+
+def _outcome0_role(raw: dict, event: dict, sport: str) -> str | None:
+    """Map outcome zero onto the score stream's documented home-away order."""
+    outcomes = _parse_json_field(raw.get("outcomes"))
+    if not outcomes:
         return None
+    league = _league_from_event(event)
+    display_first = "away" if league in _AWAY_FIRST_LEAGUES else "home"
+
+    if str(outcomes[0]).strip().lower() not in ("yes", "no"):
+        return display_first
+
+    question = str(raw.get("question") or "")
+    if "draw" in question.lower():
+        return "draw"
+    participants = _event_participants(event)
+    if participants is None:
+        return None
+    first, second = participants
+    q = _normal_name(question)
+    first_role = display_first
+    second_role = "home" if display_first == "away" else "away"
+    if _normal_name(first) and _normal_name(first) in q:
+        return first_role
+    if _normal_name(second) and _normal_name(second) in q:
+        return second_role
+    return None
 
 
 def market_from_gamma(
@@ -110,6 +193,9 @@ def market_from_gamma(
     if len(token_ids) < 2 or len(outcomes) < 2:
         return None
     if not raw.get("enableOrderBook", False):
+        return None
+    outcome0_role = _outcome0_role(raw, event, sport)
+    if outcome0_role is None:
         return None
 
     fee_schedule = raw.get("feeSchedule") or {}
@@ -124,6 +210,8 @@ def market_from_gamma(
         min_order_size=float(raw.get("orderMinSize") or 5),
         accepting_orders=bool(raw.get("acceptingOrders", False)),
         sport=sport,
+        league=_league_from_event(event),
+        outcome0_role=outcome0_role,
         game_id=event.get("gameId"),
         event_slug=str(event.get("slug", "")),
         best_of=5 if sport == "table_tennis" else _best_of_from_event(event),
@@ -149,10 +237,10 @@ class GammaClient:
         Prefers tag_id (stable) and falls back to public-search, because tag
         slugs on Gamma are not reliably honoured as filters.
         """
-        tag_id = TAG_IDS.get(sport)
+        tag_ids = TAG_IDS.get(sport, ())
         out: list[dict] = []
 
-        if tag_id:
+        if tag_ids:
             now = datetime.now(timezone.utc)
             windows = (
                 (
@@ -167,27 +255,32 @@ class GammaClient:
                 ),
             )
             seen: set[str] = set()
-            for start, end, ascending in windows:
-                data = _get(
-                    "/events",
-                    {
-                        "tag_id": tag_id,
-                        "active": "true",
-                        "closed": "false",
-                        "limit": limit,
-                        "order": "startDate",
-                        "ascending": ascending,
-                        "start_date_min": _gamma_time(start),
-                        "start_date_max": _gamma_time(end),
-                    },
-                )
-                if not isinstance(data, list):
-                    continue
-                for event in data:
-                    key = str(event.get("id") or event.get("slug") or "")
-                    if key and key not in seen:
-                        seen.add(key)
-                        out.append(event)
+            for tag_id in tag_ids:
+                for start, end, ascending in windows:
+                    data = _get(
+                        "/events/keyset",
+                        {
+                            "tag_id": tag_id,
+                            "closed": "false",
+                            "limit": min(max(limit, 1), 500),
+                            "order": "startTime",
+                            "ascending": ascending,
+                            "start_time_min": _gamma_time(start),
+                            "start_time_max": _gamma_time(end),
+                        },
+                    )
+                    events = (
+                        data.get("events")
+                        if isinstance(data, dict)
+                        else data
+                    )
+                    if not isinstance(events, list):
+                        continue
+                    for event in events:
+                        key = str(event.get("id") or event.get("slug") or "")
+                        if key and key not in seen:
+                            seen.add(key)
+                            out.append(event)
 
         if not out:
             data = _get("/public-search", {"q": sport, "limit_per_type": limit})

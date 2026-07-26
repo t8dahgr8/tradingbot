@@ -1,10 +1,14 @@
-# Polymarket Paper Trader — Tennis & Table Tennis
+# Polymarket Multi-Sport Paper Trader
 
-A production-structured **paper trading** system for Polymarket in-play tennis and
-table tennis markets. It connects to real Polymarket data, runs a real
-point-level probability model, and simulates execution against the real order
-book — with **no wallet, no private key, and no order-signing code anywhere in
-the project**. It cannot place a real trade.
+A production-structured **paper trading** system for Polymarket in-play
+match-winner markets. It supports basketball, American football, baseball,
+hockey, soccer, tennis, and table tennis. Cricket, motorsports, esports, golf,
+and combat sports are deliberately excluded because this score feed does not
+provide enough state for an honest in-play model.
+
+It connects to real Polymarket data and simulates execution against the real
+order book, with **no wallet, no private key, and no order-signing code anywhere
+in the project**. It cannot place a real trade.
 
 Starting bankroll is $100 of imaginary money.
 
@@ -21,32 +25,32 @@ This is retail-speed market making, not colocated exchange HFT.
 The claim being traded is narrow, and it's worth being precise about it because
 it determines whether any of this can work:
 
-> We are **not** claiming to know the players better than the market. We take the
-> market's own pre-match price as the truth about relative strength, convert it
-> into serve-point probabilities, and then use the live score to compute what the
-> price *should* be. The bet is that the order book is slower to reprice a score
-> than the arithmetic is.
+> We are **not** claiming to know the teams or players better than the market.
+> We take the market's own pre-match price as the strength prior, then condition
+> it on the live score, period, and clock. The bet is that the order book is
+> briefly slower to reprice a score than the arithmetic is.
 
 Concretely:
 
-1. **Anchor.** Before a match starts, read the market's winner price (say
-   Sinner 0.68). Solve for the pair of serve-point probabilities `(pa, pb)` that
-   reproduce exactly 0.68 from a cold start.
-2. **Reprice.** Every time the score changes, feed the new score into the Markov
-   model. It returns the exact win probability implied by the market's own
-   opinion plus the score.
+1. **Anchor.** Before a game starts, read the market's winner price. Every model
+   is calibrated to reproduce that probability exactly at the anchor state.
+2. **Reprice.** Tennis and table tennis use point/game/set recursion. Basketball,
+   football, baseball, and hockey use score-margin distributions with
+   sport-specific clock handling. Soccer uses a remaining-goals Poisson update
+   so home, away, and draw markets are treated separately.
 3. **Compare.** If the model says 0.74 and the book is still offering 0.70, the
    book hasn't caught up. That gap is the trade.
-4. **Decay.** The anchor is pulled toward the market over time. If the market
-   persistently disagrees, it usually knows something the model doesn't — an
-   injury, a medical timeout, a retirement. Fighting that with a Markov chain is
-   how you lose money confidently.
+4. **Shrink.** Fair value is blended back toward the current market. If the
+   market persistently disagrees, it may know something the score feed does not:
+   injuries, lineups, possession, weather, or game context.
 
-The HFT profile watches up to 120 tennis and table-tennis match-winner markets
-and actively quotes up to 12 live matches. It posts passive bids on complementary
-outcomes, offers acquired inventory one tick higher when possible, skews away
-from inventory, and cancels every working quote when the score changes. It still
-will not manufacture action: fills need real public trade volume.
+The HFT profile watches up to 140 match-winner markets and actively quotes up to
+12 live matches. It posts passive bids on complementary outcomes, skews away
+from inventory, and cancels every working quote when the score changes. Acquired
+inventory targets a 2% net return on cost: a fee-free passive fill at 0.82 is
+offered at about 0.84. Taker exits require enough extra price to cover fees.
+After 30 seconds, a smaller 0.5% net scratch profit is acceptable. It still will
+not manufacture action: fills need real public trade volume.
 
 Pregame prices are refreshed after a material 1c move. That lets the anchor
 absorb public information such as withdrawals and injury news without pretending
@@ -85,7 +89,7 @@ python run.py dashboard      # http://127.0.0.1:8000
 | `python run.py dashboard` | Web UI on `http://127.0.0.1:8000`. |
 | `python run.py markets` | List currently tradeable winner markets. |
 | `python run.py report` | Print the saved portfolio. |
-| `python -m unittest discover -s tests` | Run the test suite (160 tests). |
+| `python -m unittest discover -s tests` | Run the full test suite. |
 
 ---
 
@@ -163,6 +167,7 @@ pmpt/
   quant/
     tennis.py               point -> game -> tiebreak -> set -> match Markov model
     table_tennis.py         11-point, win-by-2, serve-every-2 model
+    team_sports.py          team score/clock and soccer remaining-goals models
   data/
     gamma.py                market discovery (stdlib urllib, no deps)
     feeds.py                CLOB order book WS + sports score WS, auto-reconnect
@@ -175,14 +180,13 @@ pmpt/
     risk.py                 Kelly sizing, exposure caps, kill switches
 docs/
   index.html                dashboard (also the GitHub Pages site)
-tests/                      160 unit tests, stdlib unittest only
+tests/                      stdlib unittest suite
 ```
 
 ### The models
 
-Both sports reduce to two numbers: the probability each player wins a point on
-their own serve. Everything else is derived exactly by recursion — no simulation,
-no fitted curves.
+Tennis and table tennis reduce to the probability each player wins a point on
+serve. Everything above that is derived by recursion.
 
 Tennis handles deuce/advantage in closed form, tiebreaks with the correct
 `A-BB-AA-BB` serve order, best-of-3 and best-of-5, and configurable final-set
@@ -204,6 +208,17 @@ which is precisely the arrangement that eliminates first-server advantage. The
 tests assert this exactly, because it's a real property and not a rounding
 artifact.
 
+For basketball, football, baseball, and hockey, the model calibrates expected
+final margin to the pregame market probability, replaces the elapsed portion
+with the observed home-away score, and scales uncertainty by time remaining.
+Recent scoring has a deliberately small, bounded influence because the run is
+already represented in the score.
+
+Soccer needs an explicit draw state. It enumerates neutral remaining-goal
+probabilities, then applies the resulting likelihood change to each market's
+own home, draw, or away prior. A late join is calibrated at the current score
+and price so the existing lead is not counted twice.
+
 ---
 
 ## Risk controls
@@ -219,17 +234,18 @@ taker fees; confidence of at least 0.45; spread under 4c; at least 20 shares of
 depth; book fresher than 5s; price between 0.05 and 0.95; signal younger than
 12s.
 
-**Scalp exits** — bank 0.4c net profit per share quickly, take a 0.1c net scratch
-profit after 10 seconds, bail when the model edge disappears, cap holds at 90
-seconds, and cut losses at 5c.
+**Scalp exits** — bank the larger of 0.4c per share or 2% net ROI, take the
+larger of 0.1c or 0.5% net ROI as a scratch after 10 seconds, bail when the model
+edge disappears, cap holds at 90 seconds, and cut losses at 5c.
 
 **Kill switches** — 15% max drawdown, 10% daily loss limit, $20 equity floor.
 Once tripped, trading stops permanently for the session.
 
 **HFT inventory controls** - 5% of equity per outcome token, 8% per market,
 25% total maker inventory, five shares per quote, a 5c hard stop, and a
-90-second hard inventory timeout. A working inventory offer blocks another buy
-on that same token, preventing self-crossing quotes.
+90-second hard inventory timeout. The normal target is 2% net ROI; after 30
+seconds the bot may accept a 0.5% net scratch. A working inventory offer blocks
+another buy on that same token, preventing self-crossing quotes.
 
 It refuses to trade until it has either a clean pre-match anchor or a live anchor
 that round-trips the current score and winner price.
@@ -277,12 +293,15 @@ Everything is in `config.yaml`. The knobs that matter most:
 | `run.mode` | `hft` for passive market making or `scalp` for the original taker strategy. |
 | `market_maker.quote_refresh_ms` | Minimum interval between quote reconciliations per market. |
 | `market_maker.min_quote_edge` | Required fair-value cushion for a passive bid. |
+| `market_maker.min_exit_roi` | Normal net return-on-cost target for maker inventory. |
+| `market_maker.scratch_exit_roi` | Smaller net target accepted after the soft inventory age. |
 | `market_maker.max_total_inventory_pct` | Portfolio-wide maker inventory ceiling. |
 | `market_maker.hard_inventory_age_ms` | Maximum time to carry unclosed maker inventory. |
 | `strategy.signal_ttl_ms` | How long after a score change the scalp mode considers an edge live. |
 | `strategy.model_weight` | 1.0 trusts the model fully; lower shrinks toward the market. |
 | `strategy.pregame_reanchor_threshold` | Refreshes the baseline after a meaningful pregame line move. |
 | `strategy.quick_take_profit` | Bid-side profit threshold for taking a fast scalp. |
+| `strategy.quick_take_profit_roi` | Percentage return threshold applied alongside the fixed amount. |
 | `strategy.scratch_profit` | Tiny profit target after the trade has been open briefly. |
 | `broker.passive_entries` | Passive mode is available, but disabled after adverse-selection stress tests. |
 | `risk.kelly_fraction` | Full Kelly on an unvalidated model empties the account. |
@@ -292,12 +311,14 @@ Everything is in `config.yaml`. The knobs that matter most:
 
 ## Honest limitations
 
-- **The score feed is game-level, not point-level.** Polymarket's sports stream
-  gives `"6-4, 3-2"`, not who's serving or the current point. Server is inferred
-  from game parity — right about half the time, worth roughly one game of
-  accuracy. Point-level data would materially improve this.
-- **The model doesn't know about injuries, cramping, weather, or momentum.**
-  That's exactly what `model_weight` and anchor decay are defending against.
+- **The public score feed can be delayed, wrong, or incomplete.** The team models
+  use only home-away score, period, and clock. They do not see possession,
+  timeouts, lineups, cards, pitching changes, weather, or play-by-play quality.
+- **Tennis is game-level, not point-level.** The feed gives `"6-4, 3-2"`, not
+  who is serving or the current point. Server is inferred from game parity.
+- **Momentum is not treated as magic.** A recent scoring run gets a small bounded
+  adjustment in team sports, because its points are already in the score and
+  large hot-hand adjustments would double-count them.
 - **In-play tennis is a competitive market.** Firms with colocated infrastructure
   and direct scoring feeds are trading this. A retail connection at 250ms is not
   a latency advantage, which is why the sweep matters so much.

@@ -13,6 +13,7 @@ from pmpt.config import AppConfig
 from pmpt.data.gamma import (
     GammaClient,
     _best_of_from_event,
+    _event_start,
     _parse_json_field,
     market_from_gamma,
 )
@@ -226,6 +227,7 @@ class TestExits(unittest.TestCase):
         self.m.fees_enabled = True
         self.m.fee_rate = 0.05
         self.s.cfg.quick_take_profit = 0.004
+        self.s.cfg.quick_take_profit_roi = 0.0
         self.s.on_score(self.m, "6-0, 5-0", "2", True, False, ts=10_000)
 
         one_tick = books(0.52, ts=10_000)[T0]  # bid .51 vs .50 entry
@@ -330,6 +332,65 @@ class TestGammaParsing(unittest.TestCase):
         self.assertEqual(_best_of_from_event({"slug": "wta-wimbledon-x-vs-y"}), 3)
         self.assertEqual(_best_of_from_event({"slug": "atp-shanghai-x-vs-y"}), 3)
 
+    def test_team_market_maps_to_home_away_score_order(self):
+        raw = {
+            "id": "1",
+            "conditionId": "c",
+            "question": "Boston Celtics vs. Los Angeles Lakers",
+            "slug": "nba-bos-lal",
+            "enableOrderBook": True,
+            "acceptingOrders": True,
+            "clobTokenIds": '["a","b"]',
+            "outcomes": '["Boston Celtics","Los Angeles Lakers"]',
+        }
+        item = market_from_gamma(
+            raw,
+            {
+                "slug": "nba-bos-lal-2026-01-01",
+                "seriesSlug": "nba",
+                "gameId": 7,
+            },
+            "basketball",
+        )
+        self.assertEqual(item.outcome0_role, "away")
+
+    def test_soccer_yes_no_markets_map_home_draw_and_away(self):
+        event = {
+            "slug": "epl-ars-che-2026-01-01",
+            "seriesSlug": "epl",
+            "title": "Arsenal FC vs. Chelsea FC",
+            "gameId": 7,
+        }
+        base = {
+            "id": "1",
+            "conditionId": "c",
+            "slug": "epl-ars-che",
+            "enableOrderBook": True,
+            "acceptingOrders": True,
+            "clobTokenIds": '["a","b"]',
+            "outcomes": '["Yes","No"]',
+        }
+        questions = {
+            "Will Arsenal FC win?": "home",
+            "Will Arsenal FC vs. Chelsea FC end in a draw?": "draw",
+            "Will Chelsea FC win?": "away",
+        }
+        for question, expected in questions.items():
+            with self.subTest(question=question):
+                item = market_from_gamma(
+                    {**base, "question": question},
+                    event,
+                    "soccer",
+                )
+                self.assertEqual(item.outcome0_role, expected)
+
+    def test_scheduled_start_time_wins_over_creation_date(self):
+        value = _event_start({
+            "startDate": "2026-07-01T00:00:00Z",
+            "startTime": "2026-08-01T12:00:00Z",
+        })
+        self.assertEqual(value.isoformat(), "2026-08-01T12:00:00+00:00")
+
 
 class TestGammaDiscovery(unittest.TestCase):
     def test_event_query_uses_bounded_current_windows(self):
@@ -341,12 +402,13 @@ class TestGammaDiscovery(unittest.TestCase):
 
         near = get.call_args_list[0].args[1]
         future = get.call_args_list[1].args[1]
+        self.assertEqual(get.call_args_list[0].args[0], "/events/keyset")
         self.assertEqual(near["ascending"], "false")
         self.assertEqual(future["ascending"], "true")
-        self.assertTrue(near["start_date_min"].endswith("Z"))
-        self.assertTrue(near["start_date_max"].endswith("Z"))
-        self.assertLess(near["start_date_min"], near["start_date_max"])
-        self.assertEqual(near["start_date_max"], future["start_date_min"])
+        self.assertTrue(near["start_time_min"].endswith("Z"))
+        self.assertTrue(near["start_time_max"].endswith("Z"))
+        self.assertLess(near["start_time_min"], near["start_time_max"])
+        self.assertEqual(near["start_time_max"], future["start_time_min"])
 
     def test_refresh_skips_events_without_score_stream_id(self):
         client = GammaClient(["table_tennis"])
@@ -386,6 +448,32 @@ class TestGammaDiscovery(unittest.TestCase):
 
 
 class TestLiveAnchorGuard(unittest.IsolatedAsyncioTestCase):
+    async def test_discovery_seeds_an_already_live_score(self):
+        engine = TradingEngine(AppConfig())
+        item = market()
+        event = {
+            "id": "event-1",
+            "gameId": item.game_id,
+            "live": True,
+            "ended": False,
+            "score": "6-3, 3-2",
+            "period": "S2",
+            "elapsed": "",
+            "markets": [{
+                "id": item.market_id,
+                "outcomePrices": '["0.72","0.28"]',
+            }],
+        }
+        engine.gamma.events = {"event-1": event}
+
+        with patch.object(engine.gamma, "refresh", return_value=[item]):
+            await engine._discover()
+
+        tracker = engine.strategy.trackers[item.market_id]
+        self.assertTrue(tracker.live)
+        self.assertEqual(tracker.last_score, "6-3, 3-2")
+        self.assertEqual(tracker.last_score_change_ms, 0)
+
     async def test_first_late_score_invalidates_pregame_anchor(self):
         engine = TradingEngine(AppConfig())
         item = market()

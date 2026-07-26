@@ -32,6 +32,7 @@ import math
 from dataclasses import dataclass, field
 
 from ..models import OrderBook, Side, Signal, TradableMarket, now_ms
+from ..quant import team_sports as team
 from ..quant import table_tennis as tt
 from ..quant import tennis as tn
 
@@ -56,7 +57,9 @@ class StrategyConfig:
     # Exit rules.
     take_profit_edge: float = 0.005  # close once the gap has converged to this
     quick_take_profit: float = 0.015  # bank a bid-side scalp when it is available
+    quick_take_profit_roi: float = 0.02  # net return on capital, not price points
     scratch_profit: float = 0.005    # after a short hold, take even tiny profits
+    scratch_profit_roi: float = 0.005
     scratch_profit_after_ms: int = 15_000
     max_hold_ms: int = 120_000       # stale in-play edges should not become bets
     exit_edge_buffer: float = 0.005  # close when the model no longer justifies risk
@@ -68,6 +71,8 @@ class StrategyConfig:
     # 1.0 = pure model. Below 1.0 shrinks toward the market, which is the honest
     # default given the model ignores fatigue, injuries and momentum.
     model_weight: float = 0.75
+    # Recent scoring gets a bounded, decaying nudge in team-sport models.
+    momentum_decay: float = 0.65
 
 
 @dataclass
@@ -81,8 +86,13 @@ class MatchTracker:
     pb: float = 0.63
     last_score: str = ""
     last_period: str = ""
+    last_elapsed: str = ""
     last_score_change_ms: int = 0
     fair_value: float | None = None        # P(outcome 0 wins), current
+    anchor_game_state: team.TeamGameState | None = None
+    game_state: team.TeamGameState | None = None
+    momentum_home: float = 0.0
+    model_quality: float = 1.0
     live: bool = False
     ended: bool = False
     anchored_cleanly: bool = False
@@ -131,6 +141,17 @@ class LiveModelStrategy:
         t.anchor_ms = ts or now_ms()
         t.anchored_cleanly = games_played <= cfg.max_games_at_anchor
 
+        if team.is_team_sport(market.sport):
+            t.anchor_game_state = team.pregame_state()
+            log.info(
+                "anchored %s %s/%s at %.3f%s",
+                market.slug or market.market_id,
+                market.sport,
+                market.league or "generic",
+                implied_prob,
+                "" if t.anchored_cleanly else "  [LATE ANCHOR - will not trade]",
+            )
+            return True
         if market.sport == "table_tennis":
             t.pa, t.pb = tt.calibrate_serve_probs(implied_prob, best_of=market.best_of or 5)
         else:
@@ -151,6 +172,7 @@ class LiveModelStrategy:
         score: str,
         period: str,
         ts: int | None = None,
+        elapsed: str = "",
     ) -> bool:
         """Calibrate strength at the current score when joining a match late."""
         cfg = self.cfg
@@ -158,6 +180,48 @@ class LiveModelStrategy:
         if not (cfg.anchor_min_price <= implied_prob <= cfg.anchor_max_price):
             t.anchored_cleanly = False
             return False
+
+        if team.is_team_sport(market.sport):
+            state = team.parse_team_score(
+                market.sport,
+                market.league,
+                score,
+                period,
+                elapsed,
+            )
+            if not state.valid or state.finished or not state.clock_known:
+                t.anchored_cleanly = False
+                t.score_tradeable = False
+                t.score_issue = "invalid score or clock"
+                return False
+
+            timestamp = ts or now_ms()
+            t.anchor_prob = implied_prob
+            t.anchor_ms = timestamp
+            t.anchor_game_state = state
+            t.game_state = state
+            t.last_score = score
+            t.last_period = period
+            t.last_elapsed = elapsed
+            t.last_score_change_ms = 0
+            t.fair_value = implied_prob
+            t.live = True
+            t.ended = False
+            t.anchored_cleanly = True
+            t.late_joined = True
+            t.score_tradeable = True
+            t.score_issue = ""
+            t.model_quality = 1.0 if state.clock_known else 0.60
+            t.updates = max(1, t.updates)
+            log.info(
+                "live-anchored %s at %s %s %s / price %.3f",
+                market.slug or market.market_id,
+                score,
+                period,
+                elapsed,
+                implied_prob,
+            )
+            return True
 
         if market.sport == "table_tennis":
             state = tt.parse_table_tennis_score(
@@ -195,6 +259,7 @@ class LiveModelStrategy:
         t.pa, t.pb = pa, pb
         t.last_score = score
         t.last_period = period
+        t.last_elapsed = elapsed
         # Joining is calibration, not a tradable score event. Arm signals only
         # after the next score update arrives from the sports feed.
         t.last_score_change_ms = 0
@@ -205,6 +270,7 @@ class LiveModelStrategy:
         t.late_joined = True
         t.score_tradeable = True
         t.score_issue = ""
+        t.model_quality = 1.0
         t.updates = max(1, t.updates)
         log.info(
             "live-anchored %s at score %s / price %.3f -> serve probs (%.4f, %.4f)",
@@ -221,6 +287,11 @@ class LiveModelStrategy:
         """Pull the anchor toward the market. Prevents fighting real news forever."""
         t = self.trackers.get(market.market_id)
         if t is None or t.anchor_prob is None:
+            return
+        if team.is_team_sport(market.sport):
+            # Team models already blend with the current market in evaluate().
+            # Recalibrating their score-state anchor in place would count the
+            # same score twice.
             return
         hl = self.cfg.reanchor_halflife_s
         if hl <= 0:
@@ -276,15 +347,23 @@ class LiveModelStrategy:
                     surface=self.cfg.surface,  # type: ignore[arg-type]
                 )
 
-    def on_score(self, market: TradableMarket, score: str, period: str,
-                 live: bool, ended: bool, ts: int | None = None) -> float | None:
+    def on_score(
+        self,
+        market: TradableMarket,
+        score: str,
+        period: str,
+        live: bool,
+        ended: bool,
+        ts: int | None = None,
+        elapsed: str = "",
+    ) -> float | None:
         """Update the model with a new score. Returns fair value for outcome 0."""
         ts = ts or now_ms()
         t = self.tracker(market)
         t.live, t.ended = live, ended
 
         changed = score != t.last_score or period != t.last_period
-        t.last_score, t.last_period = score, period
+        t.last_score, t.last_period, t.last_elapsed = score, period, elapsed
         if changed:
             t.last_score_change_ms = ts
             t.updates += 1
@@ -292,17 +371,65 @@ class LiveModelStrategy:
         if t.anchor_prob is None:
             return None
 
-        if market.sport == "table_tennis":
+        if team.is_team_sport(market.sport):
+            state = team.parse_team_score(
+                market.sport,
+                market.league,
+                score,
+                period,
+                elapsed,
+                ended=ended,
+            )
+            if not state.valid:
+                t.score_tradeable = False
+                t.score_issue = "invalid score or clock"
+                return None
+
+            previous = t.game_state
+            if (
+                previous is not None
+                and (
+                    state.home_score != previous.home_score
+                    or state.away_score != previous.away_score
+                )
+            ):
+                delta_margin = state.margin - previous.margin
+                t.momentum_home = (
+                    self.cfg.momentum_decay * t.momentum_home + delta_margin
+                )
+            t.game_state = state
+            if t.anchor_game_state is None:
+                t.anchor_game_state = team.pregame_state()
+            try:
+                fv = team.fair_probability(
+                    market.sport,
+                    t.anchor_prob,
+                    t.anchor_game_state,
+                    state,
+                    market.outcome0_role,
+                    t.momentum_home,
+                )
+            except ValueError as exc:
+                t.score_tradeable = False
+                t.score_issue = str(exc)
+                return None
+            t.ended = t.ended or state.finished
+            t.score_tradeable = not state.finished and state.clock_known
+            t.score_issue = "" if t.score_tradeable else "clock unavailable"
+            t.model_quality = 1.0 if state.clock_known else 0.60
+        elif market.sport == "table_tennis":
             st = tt.parse_table_tennis_score(score, period, best_of=market.best_of or 5)
             fv = tt.match_win_prob(st, t.pa, t.pb)
             t.score_tradeable = True
             t.score_issue = ""
+            t.model_quality = 1.0
         else:
             st = tn.parse_tennis_score(score, period, best_of=market.best_of or 3)
             fv = tn.match_win_prob(st, t.pa, t.pb)
             t.ended = t.ended or st.finished
             t.score_tradeable = not st.in_tiebreak
             t.score_issue = "" if t.score_tradeable else "tiebreak paused"
+            t.model_quality = 1.0
 
         t.fair_value = fv
         return fv
@@ -397,7 +524,25 @@ class LiveModelStrategy:
         recency = max(0.0, 1.0 - age / max(cfg.signal_ttl_ms, 1))
         spread = book.spread or 1.0
         tightness = max(0.0, 1.0 - spread / 0.10)
-        return max(0.0, min(1.0, 0.5 * recency + 0.5 * tightness))
+        base = 0.5 * recency + 0.5 * tightness
+        return max(0.0, min(1.0, base * t.model_quality))
+
+    def normalize_event(self, markets: list[TradableMarket]) -> None:
+        """Keep soccer home/draw/away probabilities mutually exhaustive."""
+        by_role: dict[str, MatchTracker] = {}
+        for market in markets:
+            if market.sport != "soccer":
+                continue
+            tracker = self.trackers.get(market.market_id)
+            if tracker is not None and tracker.fair_value is not None:
+                by_role[market.outcome0_role] = tracker
+        if set(by_role) != {"home", "draw", "away"}:
+            return
+        total = sum(tracker.fair_value or 0.0 for tracker in by_role.values())
+        if total <= 1e-9:
+            return
+        for tracker in by_role.values():
+            tracker.fair_value = (tracker.fair_value or 0.0) / total
 
     # -- exits -------------------------------------------------------------
 
@@ -451,17 +596,27 @@ class LiveModelStrategy:
 
         # Profit targets are after both the paid entry fee and the expected
         # taker fee on this exit. Gross one-tick gains can otherwise be losses.
-        if net_profit_per_share >= cfg.quick_take_profit:
+        quick_target = max(
+            cfg.quick_take_profit,
+            avg_cost * max(0.0, cfg.quick_take_profit_roi),
+        )
+        if net_profit_per_share >= quick_target:
             return True, (
-                f"bank profit net ({net_profit_per_share:.4f}/share after fees)"
+                f"bank profit net ({net_profit_per_share:.4f}/share, "
+                f"{100 * net_profit_per_share / max(avg_cost, 1e-9):.2f}% ROI)"
             )
 
+        scratch_target = max(
+            cfg.scratch_profit,
+            avg_cost * max(0.0, cfg.scratch_profit_roi),
+        )
         if (
             held_ms >= cfg.scratch_profit_after_ms
-            and net_profit_per_share >= cfg.scratch_profit
+            and net_profit_per_share >= scratch_target
         ):
             return True, (
-                f"scratch profit net ({net_profit_per_share:.4f}/share after fees)"
+                f"scratch profit net ({net_profit_per_share:.4f}/share, "
+                f"{100 * net_profit_per_share / max(avg_cost, 1e-9):.2f}% ROI)"
             )
 
         if held_ms >= cfg.max_hold_ms and net_profit_per_share >= 0:
