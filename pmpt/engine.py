@@ -451,7 +451,11 @@ class TradingEngine:
             reason=signal.reason,
         )
         self.broker.submit(order, ts)
-        self.risk.record_entry(market.market_id, ts)
+        self.risk.record_entry(
+            market.market_id,
+            ts,
+            str(signal.metadata.get("score_key", "")),
+        )
         self.orders_sent += 1
         log.info(
             "ORDER %s BUY %.0f %s @%.4f | edge=%+.3f conf=%.2f | %s",

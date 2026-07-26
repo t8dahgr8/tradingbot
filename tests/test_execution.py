@@ -385,6 +385,11 @@ class TestRisk(unittest.TestCase):
         self.assertFalse(ok)
         self.assertIn("spread", why)
 
+    def test_spread_at_limit_survives_float_noise(self):
+        self.rm.cfg.max_spread = 0.02
+        ok, why = self.approve(self.sig(), spread=0.020000000000000018)
+        self.assertTrue(ok, why)
+
     def test_thin_book_rejected(self):
         ok, why = self.approve(self.sig(), depth=1.0)
         self.assertFalse(ok)
@@ -406,6 +411,19 @@ class TestRisk(unittest.TestCase):
         ok, why = rm.approve(self.sig(), self.m, self.pf, {}, 0, 0.02, 500.0, 20_000)
         self.assertFalse(ok)
         self.assertIn("cooldown", why)
+
+    def test_same_score_cannot_be_traded_twice(self):
+        rm = RiskManager(RiskConfig(cooldown_ms=0))
+        signal = self.sig()
+        signal.metadata["score_key"] = "3|7-5, 4-6, 6-6(3-3)"
+        rm.record_entry("m1", 10_000, signal.metadata["score_key"])
+
+        ok, why = rm.approve(
+            signal, self.m, self.pf, {}, 0, 0.02, 500.0, 20_000
+        )
+
+        self.assertFalse(ok)
+        self.assertIn("already traded this score", why)
 
     def test_drawdown_halts_trading(self):
         self.pf.mark({})

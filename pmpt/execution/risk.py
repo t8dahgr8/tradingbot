@@ -60,6 +60,7 @@ class RiskState:
     day_start_equity: float = 0.0
     day_key: str = ""
     last_entry_ms: dict[str, int] = field(default_factory=dict)
+    last_entry_score: dict[str, str] = field(default_factory=dict)
 
 
 class RiskManager:
@@ -144,7 +145,7 @@ class RiskManager:
             return False, f"price {signal.market_price:.3f} outside tradeable band"
         if book_age_ms > cfg.max_book_age_ms:
             return False, f"stale book ({book_age_ms}ms)"
-        if spread is None or spread > cfg.max_spread:
+        if spread is None or spread - cfg.max_spread > 1e-9:
             return False, f"spread {spread} too wide"
         if depth < cfg.min_book_depth:
             return False, f"depth {depth:.0f} below {cfg.min_book_depth:.0f}"
@@ -156,6 +157,10 @@ class RiskManager:
         last = self.state.last_entry_ms.get(market.market_id, 0)
         if ts_ms - last < cfg.cooldown_ms:
             return False, "cooldown"
+
+        score_key = str(signal.metadata.get("score_key", ""))
+        if score_key and self.state.last_entry_score.get(market.market_id) == score_key:
+            return False, "already traded this score"
 
         if len(portfolio.positions) >= cfg.max_concurrent_positions:
             if signal.token_id not in portfolio.positions:
@@ -232,5 +237,7 @@ class RiskManager:
         # keep the journal readable and avoid dust positions.
         return float(int(shares))
 
-    def record_entry(self, market_id: str, ts_ms: int) -> None:
+    def record_entry(self, market_id: str, ts_ms: int, score_key: str = "") -> None:
         self.state.last_entry_ms[market_id] = ts_ms
+        if score_key:
+            self.state.last_entry_score[market_id] = score_key

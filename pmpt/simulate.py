@@ -381,7 +381,11 @@ def run_simulation(
                     market_id=market.market_id,
                     reason=sig.reason,
                 ), ts)
-                risk.record_entry(market.market_id, ts)
+                risk.record_entry(
+                    market.market_id,
+                    ts,
+                    str(sig.metadata.get("score_key", "")),
+                )
 
             if risk.state.halted:
                 break
