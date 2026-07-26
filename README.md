@@ -72,11 +72,13 @@ python run.py simulate --matches 200
 
 # Live paper trading needs two packages.
 pip install -r requirements.txt
-python run.py live --mode hft --minutes 60
 
-# Watch it in a browser (separate terminal).
+# Open the local control dashboard, enter a paper bankroll, and press Start.
 python run.py dashboard      # http://127.0.0.1:8000
 ```
+
+On Windows, double-click `START_HFT_LIVE.cmd` to open the same control
+dashboard without keeping a terminal window open.
 
 ### Commands
 
@@ -86,7 +88,7 @@ python run.py dashboard      # http://127.0.0.1:8000
 | `python run.py simulate --sweep` | **The important one.** Sweeps market speed to show where the edge dies. |
 | `python run.py live --mode hft` | Run the passive HFT-style paper market maker. |
 | `python run.py live --mode scalp` | Run the original score-lag paper scalper. |
-| `python run.py dashboard` | Web UI on `http://127.0.0.1:8000`. |
+| `python run.py dashboard` | Local Start/Stop controls and live web UI on `http://127.0.0.1:8000`. |
 | `python run.py markets` | List currently tradeable winner markets. |
 | `python run.py report` | Print the saved portfolio. |
 | `python -m unittest discover -s tests` | Run the full test suite. |
@@ -256,7 +258,21 @@ that round-trips the current score and winner price.
 
 `python run.py dashboard` serves a live view: equity curve, working quotes and
 queue position, maker/taker fills, quote actions, open positions, model versus
-market, feed health, and an exact breakdown of why quotes were skipped.
+market, feed health, and an exact breakdown of why quotes were skipped. The
+local page also accepts a custom starting bankroll and starts or cleanly stops
+the paper process. These controls are intentionally absent on GitHub Pages
+because a static public page cannot start a process on your computer.
+
+Every clean stop exports the complete run into:
+
+```text
+sessions/YYYY-MM-DD_HH-MM-SS/
+```
+
+The timestamp is the local date and time the process stopped. Each folder
+contains `trades.csv`, `summary.json`, the final portfolio and dashboard
+snapshots, the effective configuration, and the process/trader logs. Runtime
+files are reset for the next session, so trades from separate runs do not mix.
 
 The bot writes `state/data.json` continuously and mirrors it to `docs/data.json`.
 While live paper trading is running, it also publishes that snapshot to the

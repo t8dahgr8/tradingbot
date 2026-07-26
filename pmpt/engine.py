@@ -105,6 +105,7 @@ class TradingEngine:
             asyncio.create_task(self.sports_feed.start(), name="sports-feed"),
             asyncio.create_task(self._discovery_loop(), name="discovery"),
             asyncio.create_task(self._housekeeping_loop(), name="housekeeping"),
+            asyncio.create_task(self._control_loop(), name="local-control"),
         ]
         if self.mode == "hft":
             self._tasks.append(
@@ -127,6 +128,18 @@ class TradingEngine:
         await asyncio.sleep(seconds)
         log.info("max runtime reached")
         self.stop()
+
+    async def _control_loop(self) -> None:
+        """Honor graceful stop requests from the localhost dashboard."""
+        request_path = os.path.join(self.cfg.run.state_dir, "stop.request")
+        while not self._stop.is_set():
+            if os.path.exists(request_path):
+                log.info("local dashboard requested a clean stop")
+                with contextlib.suppress(OSError):
+                    os.remove(request_path)
+                self.stop()
+                return
+            await asyncio.sleep(0.25)
 
     def stop(self) -> None:
         self._stop.set()

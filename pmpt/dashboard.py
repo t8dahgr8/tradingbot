@@ -331,24 +331,102 @@ def snapshot_from_simulation(result, portfolio) -> dict:
     }
 
 
-def serve(state_dir: str = "state", port: int = 8000, docs_dir: str = DOCS_DIR) -> None:
-    """Serve the dashboard. `/` is the page, `/data.json` is the live snapshot."""
-    snapshot = os.path.abspath(os.path.join(state_dir, SNAPSHOT_NAME))
-    index = os.path.abspath(os.path.join(docs_dir, "index.html"))
+def serve(
+    state_dir: str = "state",
+    port: int = 8000,
+    docs_dir: str = DOCS_DIR,
+    repo_dir: str | None = None,
+    config_path: str = "config.yaml",
+) -> None:
+    """Serve the dashboard, snapshot, and localhost-only process controls."""
+    from .control import BotController
+
+    repo = os.path.abspath(repo_dir or os.getcwd())
+    state = state_dir if os.path.isabs(state_dir) else os.path.join(repo, state_dir)
+    docs = docs_dir if os.path.isabs(docs_dir) else os.path.join(repo, docs_dir)
+    config = (
+        config_path
+        if os.path.isabs(config_path)
+        else os.path.join(repo, config_path)
+    )
+    snapshot = os.path.abspath(os.path.join(state, SNAPSHOT_NAME))
+    index = os.path.abspath(os.path.join(docs, "index.html"))
 
     if not os.path.exists(index):
         raise FileNotFoundError(f"dashboard page missing at {index}")
 
+    controller = BotController(
+        repo_dir=repo,
+        state_dir=state,
+        config_path=config,
+    )
+    controller.start_monitor()
+
     class Handler(SimpleHTTPRequestHandler):
         def do_GET(self):  # noqa: N802
-            if self.path.split("?")[0] in ("/", "/index.html"):
+            path = self.path.split("?")[0]
+            if path in ("/", "/index.html"):
                 return self._send_file(index, "text/html; charset=utf-8")
-            if self.path.split("?")[0] == "/data.json":
+            if path == "/data.json":
                 if os.path.exists(snapshot):
                     return self._send_file(snapshot, "application/json")
                 return self._send_json({"error": "no snapshot yet", "stats": {}})
+            if path == "/api/control":
+                return self._send_json(controller.status())
             self.send_error(404)
             return None
+
+        def do_POST(self):  # noqa: N802
+            path = self.path.split("?")[0]
+            if path not in ("/api/start", "/api/stop"):
+                self.send_error(404)
+                return None
+            if self.headers.get("X-PMPT-Control") != "local-dashboard":
+                return self._send_json(
+                    {"ok": False, "error": "Local control header required."},
+                    status=403,
+                )
+            try:
+                payload = self._read_json_body()
+                if path == "/api/start":
+                    status = controller.start(payload.get("starting_cash"))
+                    return self._send_json({"ok": True, **status}, status=201)
+                status = controller.stop()
+                code = 202 if status["running"] else 200
+                return self._send_json({"ok": not status["running"], **status}, status=code)
+            except ValueError as exc:
+                return self._send_json(
+                    {"ok": False, "error": str(exc)},
+                    status=400,
+                )
+            except RuntimeError as exc:
+                return self._send_json(
+                    {"ok": False, "error": str(exc)},
+                    status=409,
+                )
+            except OSError as exc:
+                log.exception("local dashboard control failed")
+                return self._send_json(
+                    {"ok": False, "error": f"Control operation failed: {exc}"},
+                    status=500,
+                )
+
+        def _read_json_body(self) -> dict:
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+            except ValueError as exc:
+                raise ValueError("Invalid request length.") from exc
+            if length < 0 or length > 16_384:
+                raise ValueError("Request body is too large.")
+            if length == 0:
+                return {}
+            try:
+                value = json.loads(self.rfile.read(length).decode("utf-8"))
+            except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+                raise ValueError("Request body must be valid JSON.") from exc
+            if not isinstance(value, dict):
+                raise ValueError("Request body must be a JSON object.")
+            return value
 
         def _send_file(self, path: str, ctype: str):
             try:
@@ -365,11 +443,12 @@ def serve(state_dir: str = "state", port: int = 8000, docs_dir: str = DOCS_DIR) 
             self.wfile.write(body)
             return None
 
-        def _send_json(self, obj: dict):
+        def _send_json(self, obj: dict, status: int = 200):
             body = json.dumps(obj).encode()
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
+            self.send_response(status)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
             self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
             self.end_headers()
             self.wfile.write(body)
             return None
@@ -387,3 +466,4 @@ def serve(state_dir: str = "state", port: int = 8000, docs_dir: str = DOCS_DIR) 
         pass
     finally:
         server.server_close()
+        controller.close()

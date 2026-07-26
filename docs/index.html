@@ -27,6 +27,34 @@
   .status{border:1px solid #ff6b6655;background:#ff6b660d;color:#ffc0bd;
           padding:10px 12px;margin:10px 0 16px;border-radius:6px;font-size:12px}
   .status[hidden]{display:none}
+  .control-panel{display:grid;grid-template-columns:minmax(170px,220px) auto minmax(240px,1fr);
+                 gap:14px;align-items:end;border-top:1px solid var(--line);
+                 border-bottom:1px solid var(--line);padding:14px 0;margin:10px 0 18px}
+  .control-panel[hidden]{display:none}
+  .control-field label{display:block;color:var(--dim);font-size:11px;text-transform:uppercase;
+                       letter-spacing:.06em;margin-bottom:5px}
+  .cash-input{display:flex;align-items:center;height:38px;background:var(--panel);
+              border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .cash-input:focus-within{border-color:var(--accent)}
+  .cash-input span{color:var(--dim);font-family:var(--mono);padding-left:11px}
+  .cash-input input{width:100%;min-width:0;border:0;outline:0;background:transparent;
+                    color:var(--txt);font:14px var(--mono);padding:8px 10px 8px 4px}
+  .cash-input input:disabled{color:var(--dim)}
+  .control-actions{display:flex;gap:8px}
+  button{height:38px;border:1px solid var(--line);border-radius:6px;padding:0 14px;
+         color:var(--txt);background:var(--panel2);font:inherit;font-size:13px;
+         font-weight:600;cursor:pointer}
+  button:hover:not(:disabled){border-color:#59625b;background:#272d28}
+  button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  button:disabled{opacity:.42;cursor:not-allowed}
+  button.primary{border-color:#5cc8b566;background:#5cc8b51c;color:#9de3d7}
+  button.danger{border-color:#ff6b6655;background:#ff6b6612;color:#ffaaa6}
+  .button-icon{display:inline-block;width:14px;margin-right:5px;text-align:center}
+  .control-state{align-self:center;min-width:0}
+  .control-state strong{display:block;font-size:13px;font-weight:600}
+  .control-state span{display:block;color:var(--dim);font-size:11px;overflow-wrap:anywhere}
+  .control-error{color:#ffc0bd;font-size:12px;margin:-8px 0 16px}
+  .control-error[hidden]{display:none}
   .grid{display:grid;gap:14px}
   .cards{grid-template-columns:repeat(auto-fit,minmax(155px,1fr));margin-bottom:16px}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;
@@ -67,6 +95,14 @@
     .two{grid-template-columns:1fr}
     .wrap{padding:18px 12px 44px}
     .panel{padding:14px}
+    .control-panel{grid-template-columns:minmax(160px,1fr) auto}
+    .control-state{grid-column:1/-1}
+  }
+  @media(max-width:520px){
+    .control-panel{grid-template-columns:1fr;align-items:stretch}
+    .control-actions{width:100%}
+    .control-actions button{flex:1}
+    .control-state{grid-column:auto}
   }
 </style>
 </head>
@@ -80,6 +116,30 @@
   </header>
   <div class="sub" id="meta">Loading...</div>
   <div class="status" id="offlineStatus">Bot offline. Showing the last snapshot.</div>
+
+  <section class="control-panel" id="controlPanel" aria-label="Paper trader controls" hidden>
+    <div class="control-field">
+      <label for="startingCash">Starting cash</label>
+      <div class="cash-input">
+        <span aria-hidden="true">$</span>
+        <input id="startingCash" type="number" min="1" max="1000000000"
+               step="0.01" inputmode="decimal" value="100.00">
+      </div>
+    </div>
+    <div class="control-actions">
+      <button class="primary" id="startButton" type="button">
+        <span class="button-icon" aria-hidden="true">&#9654;</span>Start
+      </button>
+      <button class="danger" id="stopButton" type="button" disabled>
+        <span class="button-icon" aria-hidden="true">&#9632;</span>Stop
+      </button>
+    </div>
+    <div class="control-state">
+      <strong id="controlState">Checking process...</strong>
+      <span id="archiveState">No exported sessions yet.</span>
+    </div>
+  </section>
+  <div class="control-error" id="controlError" hidden></div>
 
   <div class="grid cards" id="cards"></div>
 
@@ -133,10 +193,14 @@ const age = ms => {
   return value < 1000 ? `${value.toFixed(0)}ms` : `${(value / 1000).toFixed(1)}s`;
 };
 const isGitHubPages = location.hostname.endsWith(".github.io");
+const hasLocalControls = !isGitHubPages &&
+  ["127.0.0.1","localhost"].includes(location.hostname);
 const pollIntervalMs = isGitHubPages ? 75000 : 5000;
 const offlineAfterMs = isGitHubPages ? 180000 : 90000;
 let chart = null;
 let lastSnapshot = null;
+let controlBusy = false;
+let cashDirty = false;
 
 function card(k, v, note, klass){
   return `<div class="card"><div class="k">${esc(k)}</div>
@@ -321,6 +385,120 @@ function isOnline(d){
     Number.isFinite(snapshotAge) && snapshotAge >= 0 && snapshotAge <= offlineAfterMs;
 }
 
+function renderControl(c){
+  const running = Boolean(c.running);
+  const stopping = c.state === "stopping";
+  const input = $("startingCash");
+  $("controlPanel").hidden = false;
+  if(!cashDirty || running){
+    const amount = Number(c.starting_cash);
+    if(Number.isFinite(amount)) input.value = amount.toFixed(2);
+  }
+  input.disabled = running || controlBusy;
+  $("startButton").disabled = running || controlBusy;
+  $("stopButton").disabled = !running || controlBusy;
+
+  if(stopping || (controlBusy && running)){
+    $("controlState").textContent = "Stopping cleanly...";
+  }else if(running){
+    const started = new Date(c.started_at);
+    const when = Number.isNaN(started.getTime())
+      ? ""
+      : ` | since ${started.toLocaleTimeString()}`;
+    $("controlState").textContent = `Running | PID ${c.pid ?? "-"}${when}`;
+  }else if(controlBusy){
+    $("controlState").textContent = "Starting...";
+  }else{
+    $("controlState").textContent = "Stopped";
+  }
+  $("archiveState").textContent = c.last_archive
+    ? `Last export: ${c.last_archive}`
+    : `Session exports: ${c.archive_root || "sessions"}`;
+}
+
+function showControlError(message){
+  $("controlError").textContent = message || "";
+  $("controlError").hidden = !message;
+}
+
+async function controlStatus(){
+  if(!hasLocalControls) return;
+  try{
+    const response = await fetch("/api/control?t=" + Date.now(), {cache:"no-store"});
+    if(!response.ok) throw new Error(`Control service returned ${response.status}.`);
+    renderControl(await response.json());
+    showControlError("");
+  }catch(error){
+    $("controlPanel").hidden = false;
+    $("startingCash").disabled = true;
+    $("startButton").disabled = true;
+    $("stopButton").disabled = true;
+    $("controlState").textContent = "Control service unavailable";
+    showControlError(error.message || "Could not reach the local control service.");
+  }
+}
+
+async function sendControl(path, payload){
+  const response = await fetch(path, {
+    method:"POST",
+    cache:"no-store",
+    headers:{
+      "Content-Type":"application/json",
+      "X-PMPT-Control":"local-dashboard"
+    },
+    body:JSON.stringify(payload || {})
+  });
+  let result = {};
+  try{
+    result = await response.json();
+  }catch(ignore){}
+  if(!response.ok && response.status !== 202){
+    throw new Error(result.error || `Control request failed (${response.status}).`);
+  }
+  return result;
+}
+
+async function startTrader(){
+  const amount = Number($("startingCash").value);
+  if(!Number.isFinite(amount) || amount < 1){
+    showControlError("Enter a starting amount of at least $1.00.");
+    return;
+  }
+  controlBusy = true;
+  showControlError("");
+  renderControl({running:false,state:"stopped",starting_cash:amount});
+  try{
+    const result = await sendControl("/api/start", {starting_cash:amount});
+    cashDirty = false;
+    renderControl(result);
+    await tick();
+  }catch(error){
+    showControlError(error.message || "Could not start the paper trader.");
+  }finally{
+    controlBusy = false;
+    await controlStatus();
+  }
+}
+
+async function stopTrader(){
+  controlBusy = true;
+  showControlError("");
+  $("controlState").textContent = "Stopping cleanly...";
+  $("startingCash").disabled = true;
+  $("startButton").disabled = true;
+  $("stopButton").disabled = true;
+  try{
+    const result = await sendControl("/api/stop");
+    renderControl(result);
+    await tick();
+  }catch(error){
+    showControlError(error.message || "Could not stop the paper trader.");
+  }finally{
+    controlBusy = false;
+    await controlStatus();
+  }
+}
+
 async function tick(){
   try{
     const d = await getJson(liveDataUrl());
@@ -343,8 +521,13 @@ async function tick(){
   }
 }
 
+$("startingCash").addEventListener("input", () => { cashDirty = true; });
+$("startButton").addEventListener("click", startTrader);
+$("stopButton").addEventListener("click", stopTrader);
+if(hasLocalControls) controlStatus();
 tick();
 setInterval(tick,pollIntervalMs);
+if(hasLocalControls) setInterval(controlStatus,2000);
 </script>
 </body>
 </html>

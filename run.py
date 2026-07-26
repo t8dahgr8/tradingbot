@@ -126,6 +126,11 @@ def cmd_report(args: argparse.Namespace) -> int:
 
 
 def cmd_live(args: argparse.Namespace) -> int:
+    from pmpt.control import (
+        clear_stop_request,
+        finish_live_session,
+        register_live_session,
+    )
     from pmpt.dashboard import SNAPSHOT_NAME, mark_snapshot_offline, write_snapshot
     from pmpt.engine import TradingEngine
     from pmpt.github_live import GitHubLivePublisher
@@ -146,21 +151,13 @@ def cmd_live(args: argparse.Namespace) -> int:
     print(f"\n  Paper trading with ${cfg.run.starting_cash:.2f} of imaginary money.")
     print("  No real orders can be placed. Press Ctrl-C to stop and print a report.\n")
 
-    engine = TradingEngine(cfg)
-    write_snapshot(engine, cfg.run.state_dir)
+    clear_stop_request(cfg.run.state_dir)
+    register_live_session(cfg)
+    engine = None
     publisher = None
-    if cfg.run.github_live_enabled:
-        publisher = GitHubLivePublisher(
-            repo_dir=os.path.dirname(os.path.abspath(__file__)),
-            snapshot_path=os.path.join(cfg.run.state_dir, SNAPSHOT_NAME),
-            interval_s=cfg.run.github_live_interval_s,
-            remote=cfg.run.github_live_remote,
-            branch=cfg.run.github_live_branch,
-        )
-        if not publisher.start():
-            publisher = None
 
     async def main() -> None:
+        assert engine is not None
         loop = asyncio.get_running_loop()
         for sig in (signal.SIGINT, signal.SIGTERM):
             try:
@@ -170,13 +167,27 @@ def cmd_live(args: argparse.Namespace) -> int:
         await engine.run()
 
     try:
+        engine = TradingEngine(cfg)
+        write_snapshot(engine, cfg.run.state_dir)
+        if cfg.run.github_live_enabled:
+            publisher = GitHubLivePublisher(
+                repo_dir=os.path.dirname(os.path.abspath(__file__)),
+                snapshot_path=os.path.join(cfg.run.state_dir, SNAPSHOT_NAME),
+                interval_s=cfg.run.github_live_interval_s,
+                remote=cfg.run.github_live_remote,
+                branch=cfg.run.github_live_branch,
+            )
+            if not publisher.start():
+                publisher = None
         asyncio.run(main())
     except KeyboardInterrupt:
         pass
     finally:
-        mark_snapshot_offline(cfg.run.state_dir)
+        if engine is not None:
+            mark_snapshot_offline(cfg.run.state_dir)
         if publisher is not None:
             publisher.stop(publish_final=True)
+        finish_live_session(cfg.run.state_dir)
     return 0
 
 
@@ -185,7 +196,12 @@ def cmd_dashboard(args: argparse.Namespace) -> int:
 
     cfg = load_config(args.config)
     setup_logging(args.log_level or "WARNING")
-    serve(state_dir=cfg.run.state_dir, port=args.port)
+    serve(
+        state_dir=cfg.run.state_dir,
+        port=args.port,
+        repo_dir=os.path.dirname(os.path.abspath(__file__)),
+        config_path=os.path.abspath(args.config),
+    )
     return 0
 
 
