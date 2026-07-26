@@ -143,6 +143,31 @@ class TestSignals(unittest.TestCase):
         self.s.on_score(self.m, "6-2, 6-0", "FT", live=True, ended=True, ts=10_000)
         self.assertIsNone(self.s.evaluate(self.m, books(0.55, ts=10_000), ts=10_000))
 
+    def test_no_signal_during_tiebreak_without_point_state(self):
+        self.s.on_score(
+            self.m,
+            "7-5, 4-6, 6-6(3-2)",
+            "3",
+            live=True,
+            ended=False,
+            ts=10_000,
+        )
+        tracker = self.s.trackers[self.m.market_id]
+        self.assertFalse(tracker.score_tradeable)
+        self.assertEqual(tracker.score_issue, "tiebreak paused")
+        self.assertIsNone(self.s.evaluate(self.m, books(0.40, ts=10_000), ts=10_000))
+
+    def test_completed_tiebreak_does_not_pause_later_set(self):
+        self.s.on_score(
+            self.m,
+            "7-6(5), 3-0",
+            "2",
+            live=True,
+            ended=False,
+            ts=10_000,
+        )
+        self.assertTrue(self.s.trackers[self.m.market_id].score_tradeable)
+
     def test_late_anchor_never_signals(self):
         s = LiveModelStrategy(StrategyConfig(model_weight=1.0))
         m = market()

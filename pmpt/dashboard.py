@@ -67,8 +67,6 @@ def build_snapshot(engine) -> dict:
             "liquidity": f.liquidity,
             "fee": round(f.fee, 4),
         })
-    trades.reverse()
-
     tracked = []
     for t in engine.strategy.trackers.values():
         if not t.live or t.ended:
@@ -83,7 +81,12 @@ def build_snapshot(engine) -> dict:
             "model": round(t.fair_value, 4) if t.fair_value is not None else None,
             "market_price": round(b0.mid, 4) if (b0 and b0.mid is not None) else None,
             "anchor": round(t.anchor_prob, 4) if t.anchor_prob is not None else None,
-            "tradeable": t.anchored_cleanly,
+            "tradeable": t.anchored_cleanly and t.score_tradeable,
+            "trade_status": (
+                "ready"
+                if t.anchored_cleanly and t.score_tradeable
+                else t.score_issue or "late anchor"
+            ),
         })
 
     equity = [

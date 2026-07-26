@@ -41,7 +41,7 @@ risk:
   # Entry filters.
   min_edge: 0.008             # remaining edge after slippage and two taker fees
   min_confidence: 0.45
-  max_spread: 0.04
+  max_spread: 0.02           # scalps cannot absorb a wide entry/exit spread
   min_book_depth: 20
   max_book_age_ms: 5000
   min_price: 0.05             # stay out of the tails

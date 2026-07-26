@@ -87,6 +87,8 @@ class MatchTracker:
     ended: bool = False
     anchored_cleanly: bool = False
     late_joined: bool = False
+    score_tradeable: bool = True
+    score_issue: str = ""
     updates: int = 0
 
     def score_age_ms(self, ts: int | None = None) -> int:
@@ -171,6 +173,11 @@ class LiveModelStrategy:
                 period,
                 best_of=market.best_of or 3,
             )
+            if state.in_tiebreak:
+                t.anchored_cleanly = False
+                t.score_tradeable = False
+                t.score_issue = "tiebreak paused"
+                return False
             pa, pb = tn.calibrate_serve_probs_at_state(
                 implied_prob,
                 state,
@@ -196,6 +203,8 @@ class LiveModelStrategy:
         t.ended = False
         t.anchored_cleanly = True
         t.late_joined = True
+        t.score_tradeable = True
+        t.score_issue = ""
         t.updates = max(1, t.updates)
         log.info(
             "live-anchored %s at score %s / price %.3f -> serve probs (%.4f, %.4f)",
@@ -286,10 +295,14 @@ class LiveModelStrategy:
         if market.sport == "table_tennis":
             st = tt.parse_table_tennis_score(score, period, best_of=market.best_of or 5)
             fv = tt.match_win_prob(st, t.pa, t.pb)
+            t.score_tradeable = True
+            t.score_issue = ""
         else:
             st = tn.parse_tennis_score(score, period, best_of=market.best_of or 3)
             fv = tn.match_win_prob(st, t.pa, t.pb)
             t.ended = t.ended or st.finished
+            t.score_tradeable = not st.in_tiebreak
+            t.score_issue = "" if t.score_tradeable else "tiebreak paused"
 
         t.fair_value = fv
         return fv
@@ -316,6 +329,8 @@ class LiveModelStrategy:
         if t.ended or not t.live:
             return None
         if not t.anchored_cleanly:
+            return None
+        if not t.score_tradeable:
             return None
         if t.score_age_ms(ts) > cfg.signal_ttl_ms:
             return None  # the market has had time to reprice; no edge left
@@ -366,6 +381,7 @@ class LiveModelStrategy:
                     "raw_model": t.fair_value,
                     "market_mid": mkt_p0,
                     "score": t.last_score,
+                    "score_key": f"{t.last_period}|{t.last_score}",
                     "pa": t.pa,
                     "pb": t.pb,
                 },

@@ -96,7 +96,7 @@
 
   <div class="grid two">
     <div class="panel">
-      <h2>Recent fills</h2>
+      <h2>Recent fills, oldest to newest</h2>
       <div id="trades"></div>
     </div>
     <div class="panel">
@@ -163,7 +163,7 @@ function render(d, online){
     card("Return", pct(ret), "mark-to-mid", cls(ret)),
     card("Liquidation value", money(d.liquidation_equity ?? 0),
          "if you exited now", cls((d.liquidation_equity ?? 0) - (s.starting_cash ?? 0))),
-    card("Realized P&L", money(s.realized_pnl ?? 0), `fees ${money(s.fees_paid ?? 0)}`,
+    card("Gross realized", money(s.realized_pnl ?? 0), `fees ${money(s.fees_paid ?? 0)}`,
          cls(s.realized_pnl ?? 0)),
     card("Cash", money(s.cash ?? 0), `exposure ${money(s.exposure ?? 0)}`),
     card("Max drawdown", (s.max_drawdown_pct ?? 0).toFixed(2) + "%",
@@ -199,7 +199,7 @@ function render(d, online){
       const gap = (t.model!=null && t.market_price!=null) ? t.model - t.market_price : null;
       return `<tr>
         <td class="txt">${t.outcomes?.join(" v ") ?? ""}
-          ${t.tradeable?"":'<span class="badge">late anchor</span>'}</td>
+          ${t.tradeable?"":`<span class="badge">${t.trade_status||"paused"}</span>`}</td>
         <td>${t.score||"—"}</td>
         <td class="r">${t.model!=null?(t.model*100).toFixed(1)+"%":"—"}</td>
         <td class="r ${gap!=null?cls(gap):""}">
@@ -223,7 +223,7 @@ function render(d, online){
   // Trades
   $("trades").innerHTML = table(
     [{h:"Time"},{h:"Side"},{h:"Outcome"},{h:"Price",r:1},{h:"Size",r:1}],
-    (d.trades||[]).slice(0,15).map(t=>`<tr>
+    (d.trades||[]).slice(-15).map(t=>`<tr>
       <td>${t.time}</td>
       <td><span class="badge ${t.side.toLowerCase()}">${t.side}</span></td>
       <td class="txt">${t.label}</td>
