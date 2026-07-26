@@ -125,7 +125,9 @@ def cmd_report(args: argparse.Namespace) -> int:
 
 
 def cmd_live(args: argparse.Namespace) -> int:
+    from pmpt.dashboard import SNAPSHOT_NAME, mark_snapshot_offline, write_snapshot
     from pmpt.engine import TradingEngine
+    from pmpt.github_live import GitHubLivePublisher
 
     cfg = load_config(args.config)
     if args.cash:
@@ -134,12 +136,26 @@ def cmd_live(args: argparse.Namespace) -> int:
         cfg.run.max_runtime_s = int(args.minutes * 60)
     if args.sport:
         cfg.run.sports = [args.sport]
+    if args.publish_github is not None:
+        cfg.run.github_live_enabled = args.publish_github
     setup_logging(args.log_level or cfg.run.log_level, log_dir=cfg.run.state_dir)
 
     print(f"\n  Paper trading with ${cfg.run.starting_cash:.2f} of imaginary money.")
     print("  No real orders can be placed. Press Ctrl-C to stop and print a report.\n")
 
     engine = TradingEngine(cfg)
+    write_snapshot(engine, cfg.run.state_dir)
+    publisher = None
+    if cfg.run.github_live_enabled:
+        publisher = GitHubLivePublisher(
+            repo_dir=os.path.dirname(os.path.abspath(__file__)),
+            snapshot_path=os.path.join(cfg.run.state_dir, SNAPSHOT_NAME),
+            interval_s=cfg.run.github_live_interval_s,
+            remote=cfg.run.github_live_remote,
+            branch=cfg.run.github_live_branch,
+        )
+        if not publisher.start():
+            publisher = None
 
     async def main() -> None:
         loop = asyncio.get_running_loop()
@@ -154,6 +170,10 @@ def cmd_live(args: argparse.Namespace) -> int:
         asyncio.run(main())
     except KeyboardInterrupt:
         pass
+    finally:
+        mark_snapshot_offline(cfg.run.state_dir)
+        if publisher is not None:
+            publisher.stop(publish_final=True)
     return 0
 
 
@@ -197,6 +217,12 @@ def build_parser() -> argparse.ArgumentParser:
     lv.add_argument("--cash", type=float, default=None)
     lv.add_argument("--minutes", type=float, default=None, help="stop after N minutes")
     lv.add_argument("--sport", default=None, choices=["tennis", "table_tennis"])
+    lv.add_argument(
+        "--publish-github",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="mirror live dashboard data to GitHub (default: config setting)",
+    )
     lv.set_defaults(func=cmd_live)
 
     db = sub.add_parser("dashboard", help="serve the web dashboard")

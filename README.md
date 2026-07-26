@@ -68,7 +68,7 @@ python run.py dashboard      # http://127.0.0.1:8000
 | `python run.py dashboard` | Web UI on `http://127.0.0.1:8000`. |
 | `python run.py markets` | List currently tradeable tennis markets. |
 | `python run.py report` | Print the saved portfolio. |
-| `python -m unittest discover -s tests` | Run the test suite (126 tests). |
+| `python -m unittest discover -s tests` | Run the test suite (129 tests). |
 
 ---
 
@@ -135,6 +135,7 @@ pmpt/
   models.py                 OrderBook, Order, Fill, Position, Signal
   engine.py                 async event loop: feeds -> model -> risk -> broker
   config.py                 YAML config + logging
+  github_live.py            public heartbeat publisher for GitHub Pages
   simulate.py               offline match simulator
   dashboard.py              snapshot writer + static server
   quant/
@@ -151,7 +152,7 @@ pmpt/
     risk.py                 Kelly sizing, exposure caps, kill switches
 docs/
   index.html                dashboard (also the GitHub Pages site)
-tests/                      126 unit tests, stdlib unittest only
+tests/                      129 unit tests, stdlib unittest only
 ```
 
 ### The models
@@ -214,25 +215,27 @@ health, and a breakdown of *why* signals were rejected — usually the most
 informative panel, since it tells you which filter is doing the work.
 
 The bot writes `state/data.json` continuously and mirrors it to `docs/data.json`.
+While live paper trading is running, it also publishes that snapshot to the
+isolated `live-data` branch every 30 seconds. The public page shows `LIVE` while
+heartbeats are fresh and switches to `OFFLINE` within about three minutes if the
+process stops or the computer loses its connection.
 
 ### Publishing to GitHub Pages
 
-`docs/index.html` reads `docs/data.json` as a relative path, so the same page
-works locally and hosted with no changes.
+Locally, `docs/index.html` reads `state/data.json` through the dashboard server.
+On GitHub Pages it reads `data.json` from the `live-data` branch. That branch is
+force-updated as a single commit, keeping heartbeat noise out of `main`.
 
 1. Push the repo to GitHub.
 2. **Settings → Pages → Source: Deploy from a branch**, branch `main`, folder
    `/docs`.
 3. Your dashboard is live at `https://<username>.github.io/<repo>/`.
-4. Commit `docs/data.json` whenever you want to publish a snapshot:
+4. Run `python run.py live`. Existing Git credentials publish the heartbeat; no
+   token is embedded in the page or source code.
 
-```bash
-git add docs/data.json && git commit -m "update results" && git push
-```
-
-Note this publishes a *snapshot*, not a live feed — GitHub Pages serves static
-files. For a genuinely live public dashboard you'd need a host that runs the bot
-continuously.
+GitHub Pages still serves only the frontend. The Python process runs on your
+computer, so the public dashboard is live only while that computer, the bot, and
+its internet connection are on. Use `--no-publish-github` to keep a session local.
 
 ---
 
