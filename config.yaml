@@ -39,8 +39,8 @@ risk:
   max_order_shares: 50
 
   # Entry filters.
-  min_edge: 0.012             # remaining edge after slippage and two taker fees
-  min_confidence: 0.55
+  min_edge: 0.008             # remaining edge after slippage and two taker fees
+  min_confidence: 0.45
   max_spread: 0.04
   min_book_depth: 20
   max_book_age_ms: 5000

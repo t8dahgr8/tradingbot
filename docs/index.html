@@ -138,6 +138,7 @@ function table(cols, rows, empty){
 
 function render(d, online){
   const s = d.stats || {};
+  const u = d.universe || {};
   const ret = s.total_return_pct ?? 0;
   const updated = new Date(d.generated_at);
   const updatedText = Number.isNaN(updated.getTime())
@@ -146,6 +147,7 @@ function render(d, online){
 
   $("meta").textContent = online
     ? `Updated ${updatedText} · ${d.runtime_minutes ?? 0} min runtime · ` +
+      `${u.markets ?? 0} markets watched · ${u.matched_live_games ?? 0} live supported · ` +
       `${d.signals ?? 0} signals · ${d.orders ?? 0} orders sent`
     : `Bot offline · last update ${updatedText}`;
 
@@ -203,7 +205,9 @@ function render(d, online){
         <td class="r ${gap!=null?cls(gap):""}">
           ${t.market_price!=null?(t.market_price*100).toFixed(1)+"%":"—"}</td>
       </tr>`;}),
-    "No live matches being tracked.");
+    u.markets
+      ? `${u.markets} winner markets watched; ${u.matched_live_games ?? 0} supported matches are live now.`
+      : "No winner markets discovered.");
 
   // Positions
   $("positions").innerHTML = table(

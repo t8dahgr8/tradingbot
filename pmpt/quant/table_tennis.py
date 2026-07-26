@@ -196,6 +196,44 @@ def calibrate_serve_probs(
     )
 
 
+def calibrate_serve_probs_at_state(
+    target_match_prob: float,
+    state: TableTennisMatchState,
+    avg_serve: float = DEFAULT_AVG_SERVE,
+    tol: float = 1e-5,
+    max_iter: int = 40,
+) -> tuple[float, float]:
+    """Infer player strength from a live price without double-counting the score."""
+    target = _clip(target_match_prob, 1e-4, 1 - 1e-4)
+    lo, hi = -0.25, 0.25
+    f_lo = match_win_prob(
+        state, _clip(avg_serve + lo), _clip(avg_serve - lo)
+    )
+    f_hi = match_win_prob(
+        state, _clip(avg_serve + hi), _clip(avg_serve - hi)
+    )
+    if target <= f_lo:
+        return _clip(avg_serve + lo), _clip(avg_serve - lo)
+    if target >= f_hi:
+        return _clip(avg_serve + hi), _clip(avg_serve - hi)
+
+    mid = 0.0
+    for _ in range(max_iter):
+        mid = 0.5 * (lo + hi)
+        value = match_win_prob(
+            state,
+            _clip(avg_serve + mid),
+            _clip(avg_serve - mid),
+        )
+        if abs(value - target) < tol:
+            break
+        if value < target:
+            lo = mid
+        else:
+            hi = mid
+    return _clip(avg_serve + mid), _clip(avg_serve - mid)
+
+
 # --------------------------------------------------------------------------
 # Score parsing
 # --------------------------------------------------------------------------

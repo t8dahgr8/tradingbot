@@ -5,12 +5,33 @@ import os
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 
-from pmpt.dashboard import mark_snapshot_offline
+from pmpt.dashboard import _write_json_atomic, mark_snapshot_offline
 from pmpt.github_live import GitHubLivePublisher
 
 
 class TestDashboardStatus(unittest.TestCase):
+    def test_atomic_snapshot_retries_windows_file_contention(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = os.path.join(root, "data.json")
+            real_replace = os.replace
+            attempts = 0
+
+            def flaky_replace(source, destination):
+                nonlocal attempts
+                attempts += 1
+                if attempts == 1:
+                    raise PermissionError("destination briefly in use")
+                return real_replace(source, destination)
+
+            with patch("pmpt.dashboard.os.replace", side_effect=flaky_replace):
+                _write_json_atomic(path, {"online": True})
+
+            self.assertEqual(attempts, 2)
+            with open(path, encoding="utf-8") as fh:
+                self.assertTrue(json.load(fh)["online"])
+
     def test_clean_shutdown_marks_paper_snapshot_offline(self):
         with tempfile.TemporaryDirectory() as root:
             state = os.path.join(root, "state")

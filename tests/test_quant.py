@@ -171,6 +171,11 @@ class TestTennisCalibration(unittest.TestCase):
         pa2, pb2 = tn.calibrate_serve_probs(0.80)
         self.assertGreater(pa2 - pb2, pa1 - pb1)
 
+    def test_live_state_round_trip(self):
+        state = tn.parse_tennis_score("6-3, 3-5", "S2", best_of=3)
+        pa, pb = tn.calibrate_serve_probs_at_state(0.42, state)
+        self.assertAlmostEqual(tn.match_win_prob(state, pa, pb), 0.42, places=3)
+
 
 class TestScoreParsing(unittest.TestCase):
     def test_completed_sets_and_current_set(self):
@@ -245,6 +250,15 @@ class TestTableTennis(unittest.TestCase):
             pa, pb = tt.calibrate_serve_probs(target, best_of=5)
             st = tt.TableTennisMatchState(best_of=5)
             self.assertAlmostEqual(tt.match_win_prob(st, pa, pb), target, places=3)
+
+    def test_live_state_calibration_round_trip(self):
+        state = tt.parse_table_tennis_score(
+            "11-8, 9-11, 4-3",
+            "3",
+            best_of=5,
+        )
+        pa, pb = tt.calibrate_serve_probs_at_state(0.64, state)
+        self.assertAlmostEqual(tt.match_win_prob(state, pa, pb), 0.64, places=3)
 
     def test_score_parsing(self):
         st = tt.parse_table_tennis_score("11-8, 9-11, 4-3", "3", best_of=5)
