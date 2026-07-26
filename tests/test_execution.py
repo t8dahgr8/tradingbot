@@ -209,6 +209,23 @@ class TestPaperBroker(unittest.TestCase):
         self.assertTrue(self.b.cancel(o.order_id))
         self.assertEqual(o.status, OrderStatus.CANCELLED)
 
+    def test_live_size_counts_only_matching_open_orders(self):
+        self.b.on_book(book(ts=1000), ts_ms=1000)
+        buy = Order(TOK, Side.BUY, 10, 0.55, OrderType.MARKETABLE)
+        sell = Order(TOK, Side.SELL, 7, 0.45, OrderType.MARKETABLE)
+        other = Order("tokenB", Side.SELL, 3, 0.45, OrderType.MARKETABLE)
+        self.b.submit(buy, ts_ms=1000)
+        self.b.submit(sell, ts_ms=1000)
+        self.b.submit(other, ts_ms=1000)
+
+        self.assertAlmostEqual(self.b.live_size(TOK), 17.0)
+        self.assertAlmostEqual(self.b.live_size(TOK, Side.SELL), 7.0)
+        self.assertAlmostEqual(self.b.live_size(side=Side.SELL), 10.0)
+
+        self.assertEqual(self.b.cancel_all(side=Side.SELL), 2)
+        self.assertAlmostEqual(self.b.live_size(side=Side.SELL), 0.0)
+        self.assertAlmostEqual(self.b.live_size(side=Side.BUY), 10.0)
+
 
 class TestPosition(unittest.TestCase):
     def test_open_and_average(self):
@@ -242,6 +259,24 @@ class TestPortfolio(unittest.TestCase):
         pf.apply_fill(Fill("2", TOK, Side.SELL, 0.60, 100))
         self.assertAlmostEqual(pf.cash, 110.0)
         self.assertAlmostEqual(pf.realized_pnl, 10.0)
+        self.assertNotIn(TOK, pf.positions)
+
+    def test_oversized_sell_cannot_flip_short(self):
+        pf = Portfolio(100.0)
+        pf.apply_fill(Fill("1", TOK, Side.BUY, 0.50, 10))
+        pf.apply_fill(Fill("2", TOK, Side.SELL, 0.60, 25))
+
+        self.assertAlmostEqual(pf.cash, 101.0)
+        self.assertAlmostEqual(pf.realized_pnl, 1.0)
+        self.assertNotIn(TOK, pf.positions)
+
+    def test_sell_without_position_is_ignored(self):
+        pf = Portfolio(100.0)
+        pf.apply_fill(Fill("1", TOK, Side.SELL, 0.60, 10))
+
+        self.assertAlmostEqual(pf.cash, 100.0)
+        self.assertEqual(pf.realized_pnl, 0.0)
+        self.assertEqual(pf.fills, [])
 
     def test_fees_reduce_cash(self):
         pf = Portfolio(100.0)

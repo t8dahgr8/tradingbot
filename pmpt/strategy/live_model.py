@@ -50,8 +50,13 @@ class StrategyConfig:
     anchor_min_price: float = 0.08
     anchor_max_price: float = 0.92
     # Exit rules.
-    take_profit_edge: float = 0.01   # close once the gap has converged to this
-    stop_loss: float = 0.12          # close if price moves this far against us
+    take_profit_edge: float = 0.005  # close once the gap has converged to this
+    quick_take_profit: float = 0.015  # bank a bid-side scalp when it is available
+    scratch_profit: float = 0.005    # after a short hold, take even tiny profits
+    scratch_profit_after_ms: int = 15_000
+    max_hold_ms: int = 120_000       # stale in-play edges should not become bets
+    exit_edge_buffer: float = 0.005  # close when the model no longer justifies risk
+    stop_loss: float = 0.06          # close if price moves this far against us
     hold_to_resolution: bool = False
     # Surface assumption for serve calibration when we cannot tell.
     surface: str = "unknown"
@@ -284,6 +289,7 @@ class LiveModelStrategy:
         token_id: str,
         avg_cost: float,
         book: OrderBook,
+        opened_ms: int | None = None,
         ts: int | None = None,
     ) -> tuple[bool, str]:
         """Should we close this position now?"""
@@ -296,6 +302,7 @@ class LiveModelStrategy:
         bid = book.best_bid
         if bid is None:
             return False, ""
+        held_ms = max(0, ts - opened_ms) if opened_ms else 0
 
         if t is not None and t.ended:
             return (False, "") if cfg.hold_to_resolution else (True, "match ended")
@@ -317,6 +324,21 @@ class LiveModelStrategy:
         # be pre-empted by anything.
         if bid <= avg_cost - cfg.stop_loss:
             return True, f"stop loss (bid {bid:.3f} vs cost {avg_cost:.3f})"
+
+        # A small bid-side profit is real enough for a scalping strategy. Take it.
+        if bid >= avg_cost + cfg.quick_take_profit:
+            return True, f"bank profit (bid {bid:.3f} vs cost {avg_cost:.3f})"
+
+        if held_ms >= cfg.scratch_profit_after_ms and bid >= avg_cost + cfg.scratch_profit:
+            return True, f"scratch profit (bid {bid:.3f} vs cost {avg_cost:.3f})"
+
+        if held_ms >= cfg.max_hold_ms and bid >= avg_cost:
+            return True, f"time exit (bid {bid:.3f} vs cost {avg_cost:.3f})"
+
+        # If the repriced model no longer supports the original entry, do not
+        # wait for a full stop unless the book is already too far against us.
+        if fv <= avg_cost + cfg.exit_edge_buffer and bid >= avg_cost - cfg.stop_loss * 0.5:
+            return True, f"edge gone (fair {fv:.3f} vs cost {avg_cost:.3f})"
 
         # Converged: the market agrees with us now, so the trade is done.
         if bid >= fv - cfg.take_profit_edge:

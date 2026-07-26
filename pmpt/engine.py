@@ -254,6 +254,7 @@ class TradingEngine:
         marks = self._marks()
         day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         if self.risk.check_halt(self.portfolio, marks, day):
+            self.broker.cancel_all(side=Side.BUY)
             return
 
         books = {t: self.broker.book(t) for t in market.token_ids}
@@ -267,7 +268,9 @@ class TradingEngine:
             b = books.get(token)
             if b is None:
                 continue
-            should, why = self.strategy.exit_signal(market, token, pos.avg_cost, b, ts)
+            should, why = self.strategy.exit_signal(
+                market, token, pos.avg_cost, b, pos.opened_ms, ts
+            )
             if should:
                 await self._close(market, token, why)
 
@@ -323,17 +326,21 @@ class TradingEngine:
         book = self.broker.book(token_id)
         if book is None or book.best_bid is None:
             return
+        outstanding_sell = self.broker.live_size(token_id, Side.SELL)
+        size = max(0.0, pos.shares - outstanding_sell)
+        if size <= 1e-9:
+            return
         order = Order(
             token_id=token_id,
             side=Side.SELL,
-            size=pos.shares,
+            size=size,
             limit_price=max(book.best_bid - market.tick_size, market.tick_size),
             order_type=OrderType.MARKETABLE,
             market_id=market.market_id,
             reason=why,
         )
         self.broker.submit(order)
-        log.info("CLOSE %.0f %s | %s", pos.shares,
+        log.info("CLOSE %.0f %s | %s", size,
                  market.outcomes[market.index_of(token_id)], why)
 
     async def _flatten(self, market: TradableMarket, why: str) -> None:
@@ -356,7 +363,8 @@ class TradingEngine:
             marks = self._marks()
             self.portfolio.mark(marks)
             day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-            self.risk.check_halt(self.portfolio, marks, day)
+            if self.risk.check_halt(self.portfolio, marks, day):
+                self.broker.cancel_all(side=Side.BUY)
 
             # The dashboard snapshot is cheap, so refresh it every mark rather
             # than only on the slower status cadence.

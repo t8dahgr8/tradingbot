@@ -156,13 +156,42 @@ class TestExits(unittest.TestCase):
         self.s.set_anchor(self.m, 0.55, ts=1000)
 
     def test_converged_position_is_closed(self):
-        fv = self.s.on_score(self.m, "6-2, 3-0", "2", True, False, ts=10_000)
+        s = LiveModelStrategy(StrategyConfig(model_weight=1.0, quick_take_profit=1.0))
+        s.set_anchor(self.m, 0.55, ts=1000)
+        fv = s.on_score(self.m, "6-2, 3-0", "2", True, False, ts=10_000)
         # Centre the book slightly above fair so the *bid* clearly reaches it;
         # a book centred exactly on fair leaves the bid a half-spread short.
         bk = books(min(fv + 0.02, 0.97), ts=10_000)[T0]
-        should, why = self.s.exit_signal(self.m, T0, 0.60, bk, ts=10_000)
+        should, why = s.exit_signal(self.m, T0, 0.60, bk, ts=10_000)
         self.assertTrue(should)
         self.assertIn("converged", why)
+
+    def test_small_bid_side_profit_is_banked(self):
+        self.s.on_score(self.m, "3-2", "1", True, False, ts=10_000)
+        bk = books(0.64, ts=10_000)[T0]  # best bid 0.63
+        should, why = self.s.exit_signal(self.m, T0, 0.61, bk, opened_ms=9_000, ts=10_000)
+        self.assertTrue(should)
+        self.assertIn("bank profit", why)
+
+    def test_scratch_profit_after_short_hold_is_taken(self):
+        cfg = StrategyConfig(model_weight=1.0, quick_take_profit=1.0, scratch_profit_after_ms=5_000)
+        s = LiveModelStrategy(cfg)
+        s.set_anchor(self.m, 0.55, ts=1000)
+        s.on_score(self.m, "3-2", "1", True, False, ts=10_000)
+        bk = books(0.62, ts=10_000)[T0]  # best bid 0.61
+        should, why = s.exit_signal(self.m, T0, 0.604, bk, opened_ms=1_000, ts=10_000)
+        self.assertTrue(should)
+        self.assertIn("scratch profit", why)
+
+    def test_model_edge_gone_closes_before_full_stop(self):
+        cfg = StrategyConfig(model_weight=1.0, quick_take_profit=1.0, scratch_profit_after_ms=10**9)
+        s = LiveModelStrategy(cfg)
+        s.set_anchor(self.m, 0.55, ts=1000)
+        s.on_score(self.m, "0-5", "1", True, False, ts=10_000)
+        bk = books(0.56, ts=10_000)[T0]  # best bid 0.55, not a full stop from .58
+        should, why = s.exit_signal(self.m, T0, 0.58, bk, opened_ms=9_000, ts=10_000)
+        self.assertTrue(should)
+        self.assertIn("edge gone", why)
 
     def test_stop_loss_is_not_pre_empted_by_take_profit(self):
         """A hard risk control must win over a profit-taking rule.

@@ -1,25 +1,25 @@
 {
-  "generated_at": "2026-07-26T00:14:12.631954+00:00",
+  "generated_at": "2026-07-26T01:29:16.974332+00:00",
   "mode": "simulation",
   "stats": {
     "starting_cash": 100.0,
-    "cash": 143.79,
-    "equity": 143.79,
-    "total_return_pct": 43.79,
-    "realized_pnl": 43.79,
+    "cash": 175.84,
+    "equity": 175.84,
+    "total_return_pct": 75.84,
+    "realized_pnl": 75.84,
     "unrealized_pnl": 0,
     "fees_paid": 0.0,
-    "num_fills": 106,
+    "num_fills": 1159,
     "open_positions": 0,
     "exposure": 0,
-    "max_drawdown_pct": 0.64,
+    "max_drawdown_pct": 1.299,
     "winning_positions": 0,
     "losing_positions": 0
   },
-  "liquidation_equity": 143.79,
+  "liquidation_equity": 175.84,
   "runtime_minutes": 0,
-  "signals": 1610,
-  "orders": 106,
+  "signals": 9153,
+  "orders": 1159,
   "halted": false,
   "halt_reason": "",
   "feeds": {
@@ -37,170 +37,170 @@
     {
       "time": "#59",
       "side": "SELL",
-      "label": "sim19_B",
-      "price": 0.94,
-      "size": 12.0,
+      "label": "sim199_B",
+      "price": 0.95,
+      "size": 6.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#58",
       "side": "BUY",
-      "label": "sim19_B",
-      "price": 0.91,
-      "size": 12.0,
+      "label": "sim199_B",
+      "price": 0.93,
+      "size": 6.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#57",
       "side": "SELL",
-      "label": "sim19_B",
-      "price": 0.88,
-      "size": 13.0,
+      "label": "sim199_B",
+      "price": 0.82,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#56",
       "side": "BUY",
-      "label": "sim19_B",
-      "price": 0.74,
-      "size": 13.0,
+      "label": "sim199_B",
+      "price": 0.8,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#55",
       "side": "SELL",
-      "label": "sim19_B",
-      "price": 0.7,
-      "size": 6.0,
+      "label": "sim198_B",
+      "price": 0.54,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#54",
       "side": "BUY",
-      "label": "sim19_B",
-      "price": 0.59,
-      "size": 6.0,
+      "label": "sim198_B",
+      "price": 0.52,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#53",
       "side": "SELL",
-      "label": "sim18_B",
-      "price": 0.17,
-      "size": 19.0,
+      "label": "sim198_B",
+      "price": 0.47,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#52",
       "side": "BUY",
-      "label": "sim18_B",
-      "price": 0.14,
-      "size": 19.0,
+      "label": "sim198_B",
+      "price": 0.45,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#51",
       "side": "SELL",
-      "label": "sim18_B",
-      "price": 0.17,
-      "size": 25.0,
+      "label": "sim198_B",
+      "price": 0.49,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#50",
       "side": "BUY",
-      "label": "sim18_B",
-      "price": 0.12,
-      "size": 25.0,
+      "label": "sim198_B",
+      "price": 0.47,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#49",
       "side": "SELL",
-      "label": "sim18_B",
-      "price": 0.2,
-      "size": 13.0,
+      "label": "sim198_B",
+      "price": 0.5,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#48",
       "side": "BUY",
-      "label": "sim18_B",
-      "price": 0.16,
-      "size": 13.0,
+      "label": "sim198_B",
+      "price": 0.48,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#47",
       "side": "SELL",
-      "label": "sim18_B",
-      "price": 0.27,
-      "size": 9.0,
+      "label": "sim197_B",
+      "price": 0.08,
+      "size": 6.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#46",
       "side": "BUY",
-      "label": "sim18_B",
-      "price": 0.17,
-      "size": 9.0,
+      "label": "sim197_B",
+      "price": 0.06,
+      "size": 6.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#45",
       "side": "SELL",
-      "label": "sim18_B",
-      "price": 0.19,
-      "size": 8.0,
+      "label": "sim197_B",
+      "price": 0.36,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#44",
       "side": "BUY",
-      "label": "sim18_B",
-      "price": 0.18,
-      "size": 8.0,
+      "label": "sim197_B",
+      "price": 0.34,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#43",
       "side": "SELL",
-      "label": "sim18_B",
-      "price": 0.17,
-      "size": 9.0,
+      "label": "sim196_A",
+      "price": 0.46,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#42",
       "side": "BUY",
-      "label": "sim18_B",
-      "price": 0.15,
-      "size": 9.0,
+      "label": "sim196_A",
+      "price": 0.48,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#41",
       "side": "SELL",
-      "label": "sim18_B",
-      "price": 0.15,
+      "label": "sim194_B",
+      "price": 0.18,
       "size": 8.0,
       "liquidity": "taker",
       "fee": 0.0
@@ -208,8 +208,8 @@
     {
       "time": "#40",
       "side": "BUY",
-      "label": "sim18_B",
-      "price": 0.14,
+      "label": "sim194_B",
+      "price": 0.16,
       "size": 8.0,
       "liquidity": "taker",
       "fee": 0.0
@@ -217,80 +217,80 @@
     {
       "time": "#39",
       "side": "SELL",
-      "label": "sim18_B",
-      "price": 0.15,
-      "size": 8.0,
+      "label": "sim194_B",
+      "price": 0.28,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#38",
       "side": "BUY",
-      "label": "sim18_B",
-      "price": 0.13,
-      "size": 8.0,
+      "label": "sim194_B",
+      "price": 0.26,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#37",
       "side": "SELL",
-      "label": "sim17_A",
-      "price": 0.9,
-      "size": 10.0,
+      "label": "sim193_B",
+      "price": 0.5,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#36",
       "side": "BUY",
-      "label": "sim17_A",
-      "price": 0.92,
-      "size": 10.0,
+      "label": "sim193_B",
+      "price": 0.48,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#35",
       "side": "SELL",
-      "label": "sim15_B",
-      "price": 0.92,
-      "size": 9.0,
+      "label": "sim193_B",
+      "price": 0.84,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#34",
       "side": "BUY",
-      "label": "sim15_B",
-      "price": 0.84,
-      "size": 9.0,
+      "label": "sim193_B",
+      "price": 0.82,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#33",
       "side": "SELL",
-      "label": "sim15_B",
-      "price": 0.7,
-      "size": 5.0,
+      "label": "sim193_B",
+      "price": 0.51,
+      "size": 6.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#32",
       "side": "BUY",
-      "label": "sim15_B",
-      "price": 0.63,
-      "size": 5.0,
+      "label": "sim193_B",
+      "price": 0.47,
+      "size": 6.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#31",
       "side": "SELL",
-      "label": "sim15_B",
-      "price": 0.63,
+      "label": "sim193_B",
+      "price": 0.48,
       "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
@@ -298,8 +298,8 @@
     {
       "time": "#30",
       "side": "BUY",
-      "label": "sim15_B",
-      "price": 0.61,
+      "label": "sim193_B",
+      "price": 0.46,
       "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
@@ -307,98 +307,98 @@
     {
       "time": "#29",
       "side": "SELL",
-      "label": "sim14_B",
-      "price": 0.39,
-      "size": 23.0,
+      "label": "sim192_B",
+      "price": 0.89,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#28",
       "side": "BUY",
-      "label": "sim14_B",
-      "price": 0.36,
-      "size": 6.0,
+      "label": "sim192_B",
+      "price": 0.87,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#27",
-      "side": "BUY",
-      "label": "sim14_B",
-      "price": 0.19,
-      "size": 17.0,
+      "side": "SELL",
+      "label": "sim192_B",
+      "price": 0.67,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#26",
-      "side": "SELL",
-      "label": "sim14_B",
-      "price": 0.4,
+      "side": "BUY",
+      "label": "sim192_B",
+      "price": 0.65,
       "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#25",
-      "side": "BUY",
-      "label": "sim14_B",
-      "price": 0.39,
+      "side": "SELL",
+      "label": "sim192_B",
+      "price": 0.64,
       "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#24",
-      "side": "SELL",
-      "label": "sim14_B",
-      "price": 0.37,
-      "size": 16.0,
+      "side": "BUY",
+      "label": "sim192_B",
+      "price": 0.6,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#23",
-      "side": "BUY",
-      "label": "sim14_B",
-      "price": 0.24,
-      "size": 16.0,
+      "side": "SELL",
+      "label": "sim192_B",
+      "price": 0.43,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#22",
-      "side": "SELL",
-      "label": "sim14_B",
-      "price": 0.27,
-      "size": 11.0,
+      "side": "BUY",
+      "label": "sim192_B",
+      "price": 0.4,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#21",
-      "side": "BUY",
-      "label": "sim14_B",
-      "price": 0.25,
-      "size": 11.0,
+      "side": "SELL",
+      "label": "sim192_B",
+      "price": 0.46,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#20",
-      "side": "SELL",
-      "label": "sim14_B",
-      "price": 0.65,
-      "size": 12.0,
+      "side": "BUY",
+      "label": "sim192_B",
+      "price": 0.41,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#19",
-      "side": "BUY",
-      "label": "sim14_B",
-      "price": 0.63,
+      "side": "SELL",
+      "label": "sim192_B",
+      "price": 0.46,
       "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
@@ -406,115 +406,115 @@
     {
       "time": "#18",
       "side": "BUY",
-      "label": "sim14_B",
-      "price": 0.45,
-      "size": 7.0,
+      "label": "sim192_B",
+      "price": 0.43,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#17",
       "side": "SELL",
-      "label": "sim13_B",
-      "price": 0.94,
-      "size": 22.0,
+      "label": "sim192_B",
+      "price": 0.46,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#16",
       "side": "BUY",
-      "label": "sim13_B",
-      "price": 0.91,
-      "size": 12.0,
+      "label": "sim192_B",
+      "price": 0.44,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#15",
-      "side": "BUY",
-      "label": "sim13_B",
-      "price": 0.74,
-      "size": 10.0,
+      "side": "SELL",
+      "label": "sim192_B",
+      "price": 0.49,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#14",
-      "side": "SELL",
-      "label": "sim13_B",
-      "price": 0.77,
-      "size": 10.0,
+      "side": "BUY",
+      "label": "sim192_B",
+      "price": 0.47,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#13",
-      "side": "BUY",
-      "label": "sim13_B",
-      "price": 0.73,
-      "size": 10.0,
+      "side": "SELL",
+      "label": "sim192_B",
+      "price": 0.5,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#12",
-      "side": "SELL",
-      "label": "sim13_B",
-      "price": 0.88,
-      "size": 6.0,
+      "side": "BUY",
+      "label": "sim192_B",
+      "price": 0.48,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#11",
-      "side": "BUY",
-      "label": "sim13_B",
-      "price": 0.76,
-      "size": 6.0,
+      "side": "SELL",
+      "label": "sim191_B",
+      "price": 0.29,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#10",
-      "side": "SELL",
-      "label": "sim12_B",
-      "price": 0.84,
-      "size": 20.0,
+      "side": "BUY",
+      "label": "sim191_B",
+      "price": 0.27,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#9",
-      "side": "BUY",
-      "label": "sim12_B",
-      "price": 0.78,
-      "size": 7.0,
+      "side": "SELL",
+      "label": "sim191_B",
+      "price": 0.26,
+      "size": 6.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#8",
       "side": "BUY",
-      "label": "sim12_B",
-      "price": 0.58,
-      "size": 13.0,
+      "label": "sim191_B",
+      "price": 0.23,
+      "size": 6.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#7",
       "side": "SELL",
-      "label": "sim12_B",
+      "label": "sim191_B",
       "price": 0.46,
-      "size": 14.0,
+      "size": 5.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#6",
       "side": "BUY",
-      "label": "sim12_B",
+      "label": "sim191_B",
       "price": 0.44,
       "size": 5.0,
       "liquidity": "taker",
@@ -522,172 +522,1072 @@
     },
     {
       "time": "#5",
-      "side": "BUY",
-      "label": "sim12_B",
-      "price": 0.31,
-      "size": 9.0,
+      "side": "SELL",
+      "label": "sim190_B",
+      "price": 0.72,
+      "size": 8.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#4",
-      "side": "SELL",
-      "label": "sim11_B",
-      "price": 0.94,
-      "size": 11.0,
+      "side": "BUY",
+      "label": "sim190_B",
+      "price": 0.68,
+      "size": 8.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#3",
-      "side": "BUY",
-      "label": "sim11_B",
-      "price": 0.85,
-      "size": 11.0,
+      "side": "SELL",
+      "label": "sim190_B",
+      "price": 0.71,
+      "size": 6.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#2",
-      "side": "SELL",
-      "label": "sim11_B",
-      "price": 0.92,
-      "size": 8.0,
+      "side": "BUY",
+      "label": "sim190_B",
+      "price": 0.67,
+      "size": 6.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#1",
-      "side": "BUY",
-      "label": "sim11_B",
-      "price": 0.82,
-      "size": 8.0,
+      "side": "SELL",
+      "label": "sim190_B",
+      "price": 0.66,
+      "size": 6.0,
       "liquidity": "taker",
       "fee": 0.0
     },
     {
       "time": "#0",
-      "side": "SELL",
-      "label": "sim11_B",
-      "price": 0.66,
-      "size": 5.0,
+      "side": "BUY",
+      "label": "sim190_B",
+      "price": 0.63,
+      "size": 6.0,
       "liquidity": "taker",
       "fee": 0.0
     }
   ],
   "tracked": [],
   "rejections": {
-    "max positions in this market": 138,
-    "cooldown": 133,
-    "price 0.990 outside tradeable band": 35,
-    "net edge -0.0012 < 0.0300": 22,
-    "net edge -0.0014 < 0.0300": 18,
-    "net edge -0.0046 < 0.0300": 17,
-    "price 0.970 outside tradeable band": 17,
-    "net edge -0.0019 < 0.0300": 15,
-    "net edge -0.0048 < 0.0300": 15,
-    "price 0.980 outside tradeable band": 14
+    "confidence 0.63 < 0.65": 3023,
+    "confidence 0.50 < 0.65": 2571,
+    "cooldown": 414,
+    "price 0.990 outside tradeable band": 59,
+    "confidence 0.55 < 0.65": 34,
+    "price 0.960 outside tradeable band": 23,
+    "net edge -0.0010 < 0.0200": 22,
+    "price 0.970 outside tradeable band": 20,
+    "net edge -0.0031 < 0.0200": 18,
+    "net edge -0.0040 < 0.0200": 18
   },
   "equity_curve": [
     {
-      "t": 1785024850809,
-      "equity": 102.3,
-      "cash": 102.3
+      "t": 1785029342627,
+      "equity": 100.25,
+      "cash": 100.25
     },
     {
-      "t": 1785024850910,
-      "equity": 102.3,
-      "cash": 102.3
+      "t": 1785029342733,
+      "equity": 100.25,
+      "cash": 100.25
     },
     {
-      "t": 1785024851043,
+      "t": 1785029342934,
+      "equity": 100.8,
+      "cash": 100.8
+    },
+    {
+      "t": 1785029343201,
+      "equity": 101.0,
+      "cash": 101.0
+    },
+    {
+      "t": 1785029343361,
+      "equity": 101.0,
+      "cash": 101.0
+    },
+    {
+      "t": 1785029343468,
+      "equity": 101.2,
+      "cash": 101.2
+    },
+    {
+      "t": 1785029343600,
+      "equity": 101.35,
+      "cash": 101.35
+    },
+    {
+      "t": 1785029343704,
+      "equity": 101.9,
+      "cash": 101.9
+    },
+    {
+      "t": 1785029343862,
+      "equity": 102.0,
+      "cash": 102.0
+    },
+    {
+      "t": 1785029343960,
+      "equity": 102.15,
+      "cash": 102.15
+    },
+    {
+      "t": 1785029344065,
+      "equity": 102.65,
+      "cash": 102.65
+    },
+    {
+      "t": 1785029344194,
+      "equity": 103.0,
+      "cash": 103.0
+    },
+    {
+      "t": 1785029344323,
+      "equity": 103.55,
+      "cash": 103.55
+    },
+    {
+      "t": 1785029344489,
+      "equity": 104.2,
+      "cash": 104.2
+    },
+    {
+      "t": 1785029344628,
       "equity": 105.0,
       "cash": 105.0
     },
     {
-      "t": 1785024851173,
-      "equity": 105.5,
-      "cash": 105.5
+      "t": 1785029344764,
+      "equity": 105.3,
+      "cash": 105.3
     },
     {
-      "t": 1785024851273,
-      "equity": 105.5,
-      "cash": 105.5
+      "t": 1785029344857,
+      "equity": 105.3,
+      "cash": 105.3
     },
     {
-      "t": 1785024851385,
-      "equity": 105.92,
-      "cash": 105.92
+      "t": 1785029345071,
+      "equity": 106.5,
+      "cash": 106.5
     },
     {
-      "t": 1785024851481,
-      "equity": 107.36,
-      "cash": 107.36
+      "t": 1785029345235,
+      "equity": 107.09,
+      "cash": 107.09
     },
     {
-      "t": 1785024851548,
-      "equity": 111.87,
-      "cash": 111.87
+      "t": 1785029345331,
+      "equity": 107.34,
+      "cash": 107.34
     },
     {
-      "t": 1785024851636,
-      "equity": 112.52,
-      "cash": 112.52
+      "t": 1785029345497,
+      "equity": 107.64,
+      "cash": 107.64
     },
     {
-      "t": 1785024851707,
-      "equity": 111.8,
-      "cash": 111.8
+      "t": 1785029345603,
+      "equity": 108.84,
+      "cash": 108.84
     },
     {
-      "t": 1785024851774,
-      "equity": 117.84,
-      "cash": 117.84
+      "t": 1785029345767,
+      "equity": 109.69,
+      "cash": 109.69
     },
     {
-      "t": 1785024851848,
-      "equity": 120.08,
-      "cash": 120.08
+      "t": 1785029345838,
+      "equity": 109.69,
+      "cash": 109.69
     },
     {
-      "t": 1785024851950,
+      "t": 1785029345965,
+      "equity": 110.44,
+      "cash": 110.44
+    },
+    {
+      "t": 1785029346037,
+      "equity": 110.54,
+      "cash": 110.54
+    },
+    {
+      "t": 1785029346128,
+      "equity": 110.89,
+      "cash": 110.89
+    },
+    {
+      "t": 1785029346200,
+      "equity": 110.89,
+      "cash": 110.89
+    },
+    {
+      "t": 1785029346268,
+      "equity": 111.04,
+      "cash": 111.04
+    },
+    {
+      "t": 1785029346322,
+      "equity": 111.39,
+      "cash": 111.39
+    },
+    {
+      "t": 1785029346371,
+      "equity": 111.64,
+      "cash": 111.64
+    },
+    {
+      "t": 1785029346453,
+      "equity": 111.64,
+      "cash": 111.64
+    },
+    {
+      "t": 1785029346503,
+      "equity": 111.79,
+      "cash": 111.79
+    },
+    {
+      "t": 1785029346589,
+      "equity": 112.39,
+      "cash": 112.39
+    },
+    {
+      "t": 1785029346630,
+      "equity": 112.64,
+      "cash": 112.64
+    },
+    {
+      "t": 1785029346703,
+      "equity": 112.76,
+      "cash": 112.76
+    },
+    {
+      "t": 1785029346799,
+      "equity": 112.96,
+      "cash": 112.96
+    },
+    {
+      "t": 1785029346866,
+      "equity": 113.21,
+      "cash": 113.21
+    },
+    {
+      "t": 1785029346972,
+      "equity": 113.46,
+      "cash": 113.46
+    },
+    {
+      "t": 1785029347137,
+      "equity": 113.91,
+      "cash": 113.91
+    },
+    {
+      "t": 1785029347202,
+      "equity": 114.46,
+      "cash": 114.46
+    },
+    {
+      "t": 1785029347302,
+      "equity": 114.56,
+      "cash": 114.56
+    },
+    {
+      "t": 1785029347368,
+      "equity": 114.56,
+      "cash": 114.56
+    },
+    {
+      "t": 1785029347469,
+      "equity": 115.06,
+      "cash": 115.06
+    },
+    {
+      "t": 1785029347626,
+      "equity": 115.46,
+      "cash": 115.46
+    },
+    {
+      "t": 1785029347806,
+      "equity": 116.36,
+      "cash": 116.36
+    },
+    {
+      "t": 1785029347972,
+      "equity": 116.76,
+      "cash": 116.76
+    },
+    {
+      "t": 1785029348123,
+      "equity": 116.91,
+      "cash": 116.91
+    },
+    {
+      "t": 1785029348207,
+      "equity": 116.86,
+      "cash": 116.86
+    },
+    {
+      "t": 1785029348331,
+      "equity": 117.41,
+      "cash": 117.41
+    },
+    {
+      "t": 1785029348459,
+      "equity": 117.81,
+      "cash": 117.81
+    },
+    {
+      "t": 1785029348522,
+      "equity": 118.56,
+      "cash": 118.56
+    },
+    {
+      "t": 1785029348674,
+      "equity": 118.81,
+      "cash": 118.81
+    },
+    {
+      "t": 1785029348723,
+      "equity": 118.96,
+      "cash": 118.96
+    },
+    {
+      "t": 1785029348793,
+      "equity": 119.26,
+      "cash": 119.26
+    },
+    {
+      "t": 1785029348836,
+      "equity": 119.26,
+      "cash": 119.26
+    },
+    {
+      "t": 1785029348992,
+      "equity": 119.26,
+      "cash": 119.26
+    },
+    {
+      "t": 1785029349035,
+      "equity": 119.56,
+      "cash": 119.56
+    },
+    {
+      "t": 1785029349136,
+      "equity": 119.91,
+      "cash": 119.91
+    },
+    {
+      "t": 1785029349235,
+      "equity": 120.61,
+      "cash": 120.61
+    },
+    {
+      "t": 1785029349303,
+      "equity": 120.83,
+      "cash": 120.83
+    },
+    {
+      "t": 1785029349396,
+      "equity": 121.33,
+      "cash": 121.33
+    },
+    {
+      "t": 1785029349468,
+      "equity": 121.63,
+      "cash": 121.63
+    },
+    {
+      "t": 1785029349635,
+      "equity": 121.88,
+      "cash": 121.88
+    },
+    {
+      "t": 1785029349695,
+      "equity": 122.08,
+      "cash": 122.08
+    },
+    {
+      "t": 1785029349764,
+      "equity": 122.23,
+      "cash": 122.23
+    },
+    {
+      "t": 1785029349906,
+      "equity": 122.68,
+      "cash": 122.68
+    },
+    {
+      "t": 1785029349974,
+      "equity": 122.78,
+      "cash": 122.78
+    },
+    {
+      "t": 1785029350038,
+      "equity": 122.98,
+      "cash": 122.98
+    },
+    {
+      "t": 1785029350138,
+      "equity": 123.48,
+      "cash": 123.48
+    },
+    {
+      "t": 1785029350199,
+      "equity": 123.68,
+      "cash": 123.68
+    },
+    {
+      "t": 1785029350274,
+      "equity": 123.88,
+      "cash": 123.88
+    },
+    {
+      "t": 1785029350418,
+      "equity": 124.08,
+      "cash": 124.08
+    },
+    {
+      "t": 1785029350458,
+      "equity": 124.63,
+      "cash": 124.63
+    },
+    {
+      "t": 1785029350563,
+      "equity": 124.83,
+      "cash": 124.83
+    },
+    {
+      "t": 1785029350591,
+      "equity": 125.13,
+      "cash": 125.13
+    },
+    {
+      "t": 1785029350641,
       "equity": 125.33,
       "cash": 125.33
     },
     {
-      "t": 1785024852021,
-      "equity": 128.81,
-      "cash": 128.81
+      "t": 1785029350704,
+      "equity": 125.43,
+      "cash": 125.43
     },
     {
-      "t": 1785024852105,
-      "equity": 136.24,
-      "cash": 136.24
+      "t": 1785029350740,
+      "equity": 125.53,
+      "cash": 125.53
     },
     {
-      "t": 1785024852156,
+      "t": 1785029350791,
+      "equity": 125.68,
+      "cash": 125.68
+    },
+    {
+      "t": 1785029350835,
+      "equity": 126.13,
+      "cash": 126.13
+    },
+    {
+      "t": 1785029350923,
+      "equity": 126.38,
+      "cash": 126.38
+    },
+    {
+      "t": 1785029350992,
+      "equity": 126.53,
+      "cash": 126.53
+    },
+    {
+      "t": 1785029351068,
+      "equity": 126.88,
+      "cash": 126.88
+    },
+    {
+      "t": 1785029351107,
+      "equity": 127.58,
+      "cash": 127.58
+    },
+    {
+      "t": 1785029351140,
+      "equity": 127.93,
+      "cash": 127.93
+    },
+    {
+      "t": 1785029351253,
+      "equity": 128.23,
+      "cash": 128.23
+    },
+    {
+      "t": 1785029351299,
+      "equity": 128.53,
+      "cash": 128.53
+    },
+    {
+      "t": 1785029351338,
+      "equity": 129.58,
+      "cash": 129.58
+    },
+    {
+      "t": 1785029351406,
+      "equity": 129.88,
+      "cash": 129.88
+    },
+    {
+      "t": 1785029351470,
+      "equity": 130.38,
+      "cash": 130.38
+    },
+    {
+      "t": 1785029351536,
+      "equity": 130.63,
+      "cash": 130.63
+    },
+    {
+      "t": 1785029351571,
+      "equity": 130.93,
+      "cash": 130.93
+    },
+    {
+      "t": 1785029351608,
+      "equity": 130.93,
+      "cash": 130.93
+    },
+    {
+      "t": 1785029351672,
+      "equity": 131.13,
+      "cash": 131.13
+    },
+    {
+      "t": 1785029351700,
+      "equity": 131.38,
+      "cash": 131.38
+    },
+    {
+      "t": 1785029351801,
+      "equity": 132.78,
+      "cash": 132.78
+    },
+    {
+      "t": 1785029351934,
+      "equity": 132.88,
+      "cash": 132.88
+    },
+    {
+      "t": 1785029352463,
+      "equity": 133.08,
+      "cash": 133.08
+    },
+    {
+      "t": 1785029352606,
+      "equity": 133.48,
+      "cash": 133.48
+    },
+    {
+      "t": 1785029352634,
+      "equity": 133.48,
+      "cash": 133.48
+    },
+    {
+      "t": 1785029352666,
+      "equity": 134.03,
+      "cash": 134.03
+    },
+    {
+      "t": 1785029352699,
+      "equity": 134.33,
+      "cash": 134.33
+    },
+    {
+      "t": 1785029352800,
+      "equity": 135.21,
+      "cash": 135.21
+    },
+    {
+      "t": 1785029352851,
+      "equity": 135.61,
+      "cash": 135.61
+    },
+    {
+      "t": 1785029352897,
+      "equity": 136.61,
+      "cash": 136.61
+    },
+    {
+      "t": 1785029352934,
       "equity": 137.41,
       "cash": 137.41
     },
     {
-      "t": 1785024852249,
-      "equity": 137.41,
-      "cash": 137.41
+      "t": 1785029352964,
+      "equity": 138.11,
+      "cash": 138.11
     },
     {
-      "t": 1785024852382,
-      "equity": 137.21,
-      "cash": 137.21
+      "t": 1785029353031,
+      "equity": 138.46,
+      "cash": 138.46
     },
     {
-      "t": 1785024852474,
-      "equity": 140.95,
-      "cash": 140.95
+      "t": 1785029353056,
+      "equity": 138.56,
+      "cash": 138.56
     },
     {
-      "t": 1785024852513,
-      "equity": 143.79,
-      "cash": 143.79
+      "t": 1785029353072,
+      "equity": 138.91,
+      "cash": 138.91
+    },
+    {
+      "t": 1785029353162,
+      "equity": 139.51,
+      "cash": 139.51
+    },
+    {
+      "t": 1785029353206,
+      "equity": 140.36,
+      "cash": 140.36
+    },
+    {
+      "t": 1785029353264,
+      "equity": 140.36,
+      "cash": 140.36
+    },
+    {
+      "t": 1785029353307,
+      "equity": 140.61,
+      "cash": 140.61
+    },
+    {
+      "t": 1785029353340,
+      "equity": 140.71,
+      "cash": 140.71
+    },
+    {
+      "t": 1785029353422,
+      "equity": 141.96,
+      "cash": 141.96
+    },
+    {
+      "t": 1785029353462,
+      "equity": 142.21,
+      "cash": 142.21
+    },
+    {
+      "t": 1785029353502,
+      "equity": 142.21,
+      "cash": 142.21
+    },
+    {
+      "t": 1785029353562,
+      "equity": 142.46,
+      "cash": 142.46
+    },
+    {
+      "t": 1785029353596,
+      "equity": 142.86,
+      "cash": 142.86
+    },
+    {
+      "t": 1785029353639,
+      "equity": 142.96,
+      "cash": 142.96
+    },
+    {
+      "t": 1785029353761,
+      "equity": 143.61,
+      "cash": 143.61
+    },
+    {
+      "t": 1785029353833,
+      "equity": 145.82,
+      "cash": 145.82
+    },
+    {
+      "t": 1785029353870,
+      "equity": 146.07,
+      "cash": 146.07
+    },
+    {
+      "t": 1785029353905,
+      "equity": 145.87,
+      "cash": 145.87
+    },
+    {
+      "t": 1785029353969,
+      "equity": 145.97,
+      "cash": 145.97
+    },
+    {
+      "t": 1785029354000,
+      "equity": 146.22,
+      "cash": 146.22
+    },
+    {
+      "t": 1785029354032,
+      "equity": 146.32,
+      "cash": 146.32
+    },
+    {
+      "t": 1785029354065,
+      "equity": 146.67,
+      "cash": 146.67
+    },
+    {
+      "t": 1785029354138,
+      "equity": 147.32,
+      "cash": 147.32
+    },
+    {
+      "t": 1785029354191,
+      "equity": 147.62,
+      "cash": 147.62
+    },
+    {
+      "t": 1785029354265,
+      "equity": 148.32,
+      "cash": 148.32
+    },
+    {
+      "t": 1785029354294,
+      "equity": 148.42,
+      "cash": 148.42
+    },
+    {
+      "t": 1785029354329,
+      "equity": 149.19,
+      "cash": 149.19
+    },
+    {
+      "t": 1785029354364,
+      "equity": 149.94,
+      "cash": 149.94
+    },
+    {
+      "t": 1785029354396,
+      "equity": 150.34,
+      "cash": 150.34
+    },
+    {
+      "t": 1785029354430,
+      "equity": 150.34,
+      "cash": 150.34
+    },
+    {
+      "t": 1785029354506,
+      "equity": 150.69,
+      "cash": 150.69
+    },
+    {
+      "t": 1785029354599,
+      "equity": 151.04,
+      "cash": 151.04
+    },
+    {
+      "t": 1785029354667,
+      "equity": 151.73,
+      "cash": 151.73
+    },
+    {
+      "t": 1785029354727,
+      "equity": 151.83,
+      "cash": 151.83
+    },
+    {
+      "t": 1785029354768,
+      "equity": 152.86,
+      "cash": 152.86
+    },
+    {
+      "t": 1785029354797,
+      "equity": 153.16,
+      "cash": 153.16
+    },
+    {
+      "t": 1785029354836,
+      "equity": 153.61,
+      "cash": 153.61
+    },
+    {
+      "t": 1785029354898,
+      "equity": 154.21,
+      "cash": 154.21
+    },
+    {
+      "t": 1785029354962,
+      "equity": 154.96,
+      "cash": 154.96
+    },
+    {
+      "t": 1785029355027,
+      "equity": 155.87,
+      "cash": 155.87
+    },
+    {
+      "t": 1785029355073,
+      "equity": 156.3,
+      "cash": 156.3
+    },
+    {
+      "t": 1785029355121,
+      "equity": 156.3,
+      "cash": 156.3
+    },
+    {
+      "t": 1785029355141,
+      "equity": 157.1,
+      "cash": 157.1
+    },
+    {
+      "t": 1785029355201,
+      "equity": 155.06,
+      "cash": 155.06
+    },
+    {
+      "t": 1785029355268,
+      "equity": 155.46,
+      "cash": 155.46
+    },
+    {
+      "t": 1785029355305,
+      "equity": 155.96,
+      "cash": 155.96
+    },
+    {
+      "t": 1785029355372,
+      "equity": 156.65,
+      "cash": 156.65
+    },
+    {
+      "t": 1785029355429,
+      "equity": 157.6,
+      "cash": 157.6
+    },
+    {
+      "t": 1785029355496,
+      "equity": 158.16,
+      "cash": 158.16
+    },
+    {
+      "t": 1785029355535,
+      "equity": 158.71,
+      "cash": 158.71
+    },
+    {
+      "t": 1785029355568,
+      "equity": 159.38,
+      "cash": 159.38
+    },
+    {
+      "t": 1785029355592,
+      "equity": 159.63,
+      "cash": 159.63
+    },
+    {
+      "t": 1785029355606,
+      "equity": 159.88,
+      "cash": 159.88
+    },
+    {
+      "t": 1785029355636,
+      "equity": 160.28,
+      "cash": 160.28
+    },
+    {
+      "t": 1785029355674,
+      "equity": 161.08,
+      "cash": 161.08
+    },
+    {
+      "t": 1785029355728,
+      "equity": 161.91,
+      "cash": 161.91
+    },
+    {
+      "t": 1785029355752,
+      "equity": 161.91,
+      "cash": 161.91
+    },
+    {
+      "t": 1785029355772,
+      "equity": 162.91,
+      "cash": 162.91
+    },
+    {
+      "t": 1785029355794,
+      "equity": 163.31,
+      "cash": 163.31
+    },
+    {
+      "t": 1785029355806,
+      "equity": 163.46,
+      "cash": 163.46
+    },
+    {
+      "t": 1785029355866,
+      "equity": 163.88,
+      "cash": 163.88
+    },
+    {
+      "t": 1785029355892,
+      "equity": 164.13,
+      "cash": 164.13
+    },
+    {
+      "t": 1785029355907,
+      "equity": 164.53,
+      "cash": 164.53
+    },
+    {
+      "t": 1785029355974,
+      "equity": 164.88,
+      "cash": 164.88
+    },
+    {
+      "t": 1785029356028,
+      "equity": 165.35,
+      "cash": 165.35
+    },
+    {
+      "t": 1785029356066,
+      "equity": 165.55,
+      "cash": 165.55
+    },
+    {
+      "t": 1785029356099,
+      "equity": 165.9,
+      "cash": 165.9
+    },
+    {
+      "t": 1785029356128,
+      "equity": 166.73,
+      "cash": 166.73
+    },
+    {
+      "t": 1785029356168,
+      "equity": 167.39,
+      "cash": 167.39
+    },
+    {
+      "t": 1785029356203,
+      "equity": 167.86,
+      "cash": 167.86
+    },
+    {
+      "t": 1785029356235,
+      "equity": 168.06,
+      "cash": 168.06
+    },
+    {
+      "t": 1785029356297,
+      "equity": 168.26,
+      "cash": 168.26
+    },
+    {
+      "t": 1785029356329,
+      "equity": 168.46,
+      "cash": 168.46
+    },
+    {
+      "t": 1785029356368,
+      "equity": 168.91,
+      "cash": 168.91
+    },
+    {
+      "t": 1785029356420,
+      "equity": 169.46,
+      "cash": 169.46
+    },
+    {
+      "t": 1785029356439,
+      "equity": 170.13,
+      "cash": 170.13
+    },
+    {
+      "t": 1785029356463,
+      "equity": 170.48,
+      "cash": 170.48
+    },
+    {
+      "t": 1785029356499,
+      "equity": 170.68,
+      "cash": 170.68
+    },
+    {
+      "t": 1785029356555,
+      "equity": 170.68,
+      "cash": 170.68
+    },
+    {
+      "t": 1785029356594,
+      "equity": 171.13,
+      "cash": 171.13
+    },
+    {
+      "t": 1785029356603,
+      "equity": 171.23,
+      "cash": 171.23
+    },
+    {
+      "t": 1785029356631,
+      "equity": 171.58,
+      "cash": 171.58
+    },
+    {
+      "t": 1785029356668,
+      "equity": 172.67,
+      "cash": 172.67
+    },
+    {
+      "t": 1785029356706,
+      "equity": 173.05,
+      "cash": 173.05
+    },
+    {
+      "t": 1785029356732,
+      "equity": 174.3,
+      "cash": 174.3
+    },
+    {
+      "t": 1785029356764,
+      "equity": 174.84,
+      "cash": 174.84
+    },
+    {
+      "t": 1785029356802,
+      "equity": 175.1,
+      "cash": 175.1
+    },
+    {
+      "t": 1785029356821,
+      "equity": 175.1,
+      "cash": 175.1
+    },
+    {
+      "t": 1785029356835,
+      "equity": 175.0,
+      "cash": 175.0
+    },
+    {
+      "t": 1785029356856,
+      "equity": 175.22,
+      "cash": 175.22
+    },
+    {
+      "t": 1785029356872,
+      "equity": 175.62,
+      "cash": 175.62
+    },
+    {
+      "t": 1785029356906,
+      "equity": 175.84,
+      "cash": 175.84
     }
   ]
 }

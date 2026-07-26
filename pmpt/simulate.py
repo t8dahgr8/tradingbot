@@ -296,6 +296,7 @@ def run_simulation(
 
                 marks = {t: b.mid for t, b in books.items() if b.mid is not None}
                 if risk.check_halt(portfolio, marks, "sim"):
+                    broker.cancel_all(side=Side.BUY)
                     break
 
                 # Exits.
@@ -304,11 +305,15 @@ def run_simulation(
                     if pos is None or pos.shares <= 0:
                         continue
                     should, why = strategy.exit_signal(
-                        market, token, pos.avg_cost, books[token], ts
+                        market, token, pos.avg_cost, books[token], pos.opened_ms, ts
                     )
                     if should and books[token].best_bid:
+                        outstanding_sell = broker.live_size(token, Side.SELL)
+                        close_size = max(0.0, pos.shares - outstanding_sell)
+                        if close_size <= 1e-9:
+                            continue
                         broker.submit(Order(
-                            token_id=token, side=Side.SELL, size=pos.shares,
+                            token_id=token, side=Side.SELL, size=close_size,
                             limit_price=max(books[token].best_bid - 0.01, 0.01),
                             order_type=OrderType.MARKETABLE, market_id=market.market_id,
                             reason=why,

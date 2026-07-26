@@ -68,7 +68,7 @@ python run.py dashboard      # http://127.0.0.1:8000
 | `python run.py dashboard` | Web UI on `http://127.0.0.1:8000`. |
 | `python run.py markets` | List currently tradeable tennis markets. |
 | `python run.py report` | Print the saved portfolio. |
-| `python -m unittest discover -s tests` | Run the test suite (90 tests). |
+| `python -m unittest discover -s tests` | Run the test suite (126 tests). |
 
 ---
 
@@ -151,7 +151,7 @@ pmpt/
     risk.py                 Kelly sizing, exposure caps, kill switches
 docs/
   index.html                dashboard (also the GitHub Pages site)
-tests/                      90 unit tests, stdlib unittest only
+tests/                      126 unit tests, stdlib unittest only
 ```
 
 ### The models
@@ -187,15 +187,18 @@ artifact.
 On a $100 bankroll what kills you isn't a bad model, it's one oversized position
 in a market you misread. Every trade must survive all of:
 
-**Sizing** — fractional Kelly (default 0.20×), capped at 10% of equity per trade,
-15% per market, 60% total exposure.
+**Sizing** — fractional Kelly (default 0.10×), capped at 5% of equity per trade,
+8% per market, 20% total exposure.
 
-**Entry filters** — minimum 3% edge *after* assumed slippage and fees; spread
-under 5c; at least 50 shares of depth; book fresher than 5s; price between 0.05
+**Entry filters** — minimum 2% edge *after* assumed slippage and fees; spread
+under 3c; at least 50 shares of depth; book fresher than 5s; price between 0.05
 and 0.95 (the tails have asymmetric resolution risk and illusory edges); signal
-younger than 45s.
+younger than 15s.
 
-**Kill switches** — 25% max drawdown, 15% daily loss limit, $20 equity floor.
+**Exits** — bank small bid-side profits quickly, take scratch profits after a
+short hold, bail when the model edge disappears, and cut losses at 6c.
+
+**Kill switches** — 12% max drawdown, 8% daily loss limit, $20 equity floor.
 Once tripped, trading stops permanently for the session.
 
 It also **refuses to trade a match it didn't see from the start**, because
@@ -242,6 +245,8 @@ Everything is in `config.yaml`. The knobs that matter most:
 | `broker.latency_ms` | The single biggest realism lever. Raise it if unsure. |
 | `strategy.signal_ttl_ms` | How long after a score change you believe an edge is real. |
 | `strategy.model_weight` | 1.0 trusts the model fully; lower shrinks toward the market. |
+| `strategy.quick_take_profit` | Bid-side profit threshold for taking a fast scalp. |
+| `strategy.scratch_profit` | Tiny profit target after the trade has been open briefly. |
 | `risk.kelly_fraction` | Full Kelly on an unvalidated model empties the account. |
 | `risk.min_edge` | Must exceed real costs or you're paying the spread for fun. |
 

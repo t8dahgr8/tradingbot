@@ -134,15 +134,29 @@ class PaperBroker:
                     return True
         return False
 
-    def cancel_all(self, token_id: str | None = None) -> int:
+    def cancel_all(self, token_id: str | None = None, side: Side | None = None) -> int:
         n = 0
         for bucket in (self.pending, self.resting):
             for o in list(bucket):
-                if token_id is None or o.token_id == token_id:
+                if (token_id is None or o.token_id == token_id) and (side is None or o.side == side):
                     o.status = OrderStatus.CANCELLED
                     bucket.remove(o)
                     n += 1
         return n
+
+    def live_size(self, token_id: str | None = None, side: Side | None = None) -> float:
+        """Shares already submitted and still able to fill."""
+        total = 0.0
+        for bucket in (self.pending, self.resting):
+            for o in bucket:
+                if not o.is_live:
+                    continue
+                if token_id is not None and o.token_id != token_id:
+                    continue
+                if side is not None and o.side != side:
+                    continue
+                total += o.remaining
+        return total
 
     # -- market data -------------------------------------------------------
 

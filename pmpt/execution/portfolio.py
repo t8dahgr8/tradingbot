@@ -6,7 +6,7 @@ import csv
 import json
 import logging
 import os
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from datetime import datetime, timezone
 
 from ..models import Fill, Position, Side, now_ms
@@ -49,6 +49,17 @@ class Portfolio:
 
     def apply_fill(self, fill: Fill, market_id: str = "", label: str = "") -> None:
         pos = self.positions.get(fill.token_id)
+        if fill.side == Side.SELL:
+            if pos is None or pos.shares <= 1e-9:
+                log.warning("ignoring sell fill without a long position: %s", fill.token_id)
+                return
+            if fill.size > pos.shares + 1e-9:
+                log.warning(
+                    "capping sell fill for %s from %.4f to held %.4f shares",
+                    fill.token_id, fill.size, pos.shares,
+                )
+                fill = replace(fill, size=pos.shares)
+
         if pos is None:
             pos = Position(token_id=fill.token_id, market_id=market_id, label=label)
             self.positions[fill.token_id] = pos
@@ -60,7 +71,7 @@ class Portfolio:
         self.fills.append(fill)
         self._journal(fill, pos, realized, label)
 
-        if abs(pos.shares) <= 1e-9 and abs(pos.realized_pnl) < 1e-12:
+        if abs(pos.shares) <= 1e-9:
             self.positions.pop(fill.token_id, None)
 
     def settle(self, token_id: str, payout: float) -> float:
