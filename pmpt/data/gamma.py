@@ -17,6 +17,7 @@ import ssl
 import urllib.error
 import urllib.parse
 import urllib.request
+from datetime import datetime, timedelta, timezone
 from typing import Any, Iterable
 
 from ..models import TradableMarket
@@ -28,9 +29,13 @@ GAMMA = "https://gamma-api.polymarket.com"
 # Verified against the live tags endpoint.
 TAG_IDS = {
     "tennis": 864,
+    "table_tennis": 103767,
 }
 
 USER_AGENT = "pmpt-paper-trader/1.0 (+research)"
+DISCOVERY_LOOKBACK_HOURS = 12
+DISCOVERY_LOOKAHEAD_HOURS = 36
+NEAR_FUTURE_HOURS = 2
 
 
 def _get(path: str, params: dict[str, Any] | None = None, timeout: float = 15.0) -> Any:
@@ -79,6 +84,22 @@ def _best_of_from_event(event: dict) -> int:
     return 5 if (is_slam and not is_womens) else 3
 
 
+def _gamma_time(value: datetime) -> str:
+    """Gamma's date filters require a UTC Z suffix, not an encoded +00:00."""
+    return value.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _event_start(event: dict) -> datetime | None:
+    raw = event.get("startDate")
+    if not raw:
+        return None
+    try:
+        value = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+        return value if value.tzinfo is not None else value.replace(tzinfo=timezone.utc)
+    except (TypeError, ValueError):
+        return None
+
+
 def market_from_gamma(
     raw: dict, event: dict | None = None, sport: str = "tennis"
 ) -> TradableMarket | None:
@@ -105,7 +126,7 @@ def market_from_gamma(
         sport=sport,
         game_id=event.get("gameId"),
         event_slug=str(event.get("slug", "")),
-        best_of=_best_of_from_event(event),
+        best_of=5 if sport == "table_tennis" else _best_of_from_event(event),
         fees_enabled=bool(raw.get("feesEnabled", False)),
         fee_rate=float(fee_schedule.get("rate") or 0.0),
     )
@@ -132,25 +153,56 @@ class GammaClient:
         out: list[dict] = []
 
         if tag_id:
-            data = _get(
-                "/events",
-                {
-                    "tag_id": tag_id,
-                    "active": "true",
-                    "closed": "false",
-                    "limit": limit,
-                    "order": "startDate",
-                    "ascending": "true",
-                },
+            now = datetime.now(timezone.utc)
+            windows = (
+                (
+                    now - timedelta(hours=DISCOVERY_LOOKBACK_HOURS),
+                    now + timedelta(hours=NEAR_FUTURE_HOURS),
+                    "false",
+                ),
+                (
+                    now + timedelta(hours=NEAR_FUTURE_HOURS),
+                    now + timedelta(hours=DISCOVERY_LOOKAHEAD_HOURS),
+                    "true",
+                ),
             )
-            if isinstance(data, list):
-                out = data
+            seen: set[str] = set()
+            for start, end, ascending in windows:
+                data = _get(
+                    "/events",
+                    {
+                        "tag_id": tag_id,
+                        "active": "true",
+                        "closed": "false",
+                        "limit": limit,
+                        "order": "startDate",
+                        "ascending": ascending,
+                        "start_date_min": _gamma_time(start),
+                        "start_date_max": _gamma_time(end),
+                    },
+                )
+                if not isinstance(data, list):
+                    continue
+                for event in data:
+                    key = str(event.get("id") or event.get("slug") or "")
+                    if key and key not in seen:
+                        seen.add(key)
+                        out.append(event)
 
         if not out:
             data = _get("/public-search", {"q": sport, "limit_per_type": limit})
             if isinstance(data, dict):
                 out = [e for e in (data.get("events") or []) if not e.get("closed")]
 
+        now = datetime.now(timezone.utc)
+        out.sort(
+            key=lambda event: (
+                _event_start(event) is None,
+                abs((_event_start(event) - now).total_seconds())
+                if _event_start(event)
+                else float("inf"),
+            )
+        )
         return out
 
     def refresh(self, only_live: bool = False, min_liquidity: float = 0.0
@@ -161,6 +213,10 @@ class GammaClient:
         for sport in self.sports:
             for event in self.fetch_events(sport):
                 if event.get("closed") or event.get("ended"):
+                    continue
+                # Without this ID the public score stream can never update the
+                # market, so it can never produce a valid in-play signal.
+                if event.get("gameId") is None:
                     continue
                 if only_live and not event.get("live"):
                     continue
@@ -185,6 +241,16 @@ class GammaClient:
 
         log.info("discovery: %d tradeable markets across %s", len(found), self.sports)
         return found
+
+    def activate(self, markets: Iterable[TradableMarket]) -> None:
+        """Restrict price routing to the engine's selected watchlist."""
+        selected = list(markets)
+        self.markets = {m.market_id: m for m in selected}
+        self.by_token = {
+            token: market
+            for market in selected
+            for token in market.token_ids
+        }
 
     # -- live game state ---------------------------------------------------
 

@@ -23,7 +23,7 @@ it determines whether any of this can work:
 
 Concretely:
 
-1. **Anchor.** When a match starts, read the market's pre-match price (say
+1. **Anchor.** Before a match starts, read the market's winner price (say
    Sinner 0.68). Solve for the pair of serve-point probabilities `(pa, pb)` that
    reproduce exactly 0.68 from a cold start.
 2. **Reprice.** Every time the score changes, feed the new score into the Markov
@@ -36,8 +36,17 @@ Concretely:
    injury, a medical timeout, a retirement. Fighting that with a Markov chain is
    how you lose money confidently.
 
-The edge is real but small, and it decays in seconds. Everything in the risk
-layer exists to stop a $100 account from dying while trying to harvest it.
+The aggressive profile watches up to 120 tennis and table-tennis match-winner
+markets, permits 12 simultaneous paper positions, and looks for many short
+scalps instead of one large payout. It still will not manufacture action: every
+entry must clear slippage, the market's live fee schedule, and a 1.2% remaining
+model edge.
+
+Pregame prices are refreshed after a material 1c move. That lets the anchor
+absorb public information such as withdrawals and injury news without pretending
+that a scraped headline is a reliable trading signal. Orders are generated only
+from a fresh live score, and a match first seen after play has progressed is
+marked untradeable.
 
 ---
 
@@ -66,9 +75,9 @@ python run.py dashboard      # http://127.0.0.1:8000
 | `python run.py simulate --sweep` | **The important one.** Sweeps market speed to show where the edge dies. |
 | `python run.py live` | Paper trade real markets in real time. |
 | `python run.py dashboard` | Web UI on `http://127.0.0.1:8000`. |
-| `python run.py markets` | List currently tradeable tennis markets. |
+| `python run.py markets` | List currently tradeable winner markets. |
 | `python run.py report` | Print the saved portfolio. |
-| `python -m unittest discover -s tests` | Run the test suite (129 tests). |
+| `python -m unittest discover -s tests` | Run the test suite (137 tests). |
 
 ---
 
@@ -81,21 +90,23 @@ python run.py simulate --matches 200 --sweep
 ```
 
 ```
-   catchup   return %   trades   signals  max dd %
+   catchup   return %    fills   signals  max dd %
   ------------------------------------------------
-      0.05    1850.92      816      9418      0.41
-      0.10     748.12      663      8737      1.06
-      0.20     399.85      476      7144      1.41
-      0.35     243.72      381      4730      0.35
-      0.50      64.12      276      2838      1.89
-      0.75       1.56       72      1105      5.49
-      1.00       0.00        0       203      0.00
+      0.05      11.63     1277      4732      2.74
+      0.10      19.41     1073      4507      0.67
+      0.20      21.45      684      3948      0.12
+      0.35      15.90      410      3201      0.12
+      0.50      13.64      240      2237      0.00
+      0.75       3.27       52       839      0.00
+      1.00       0.00        0       105      0.00
 ```
 
 `catchup` is how fast the synthetic market corrects toward fair value. **The
-lag is the edge.** At `1.00` the book reprices instantly, and the strategy
-correctly makes *nothing* — it still generates 203 signals but executes zero
-trades, because every one of them fails the net-edge test after costs.
+lag is the edge.** These are the current 80-match tennis results with the 0.05
+fee fallback. At `1.00` the book reprices instantly, and the strategy correctly
+makes *nothing* — signals appear, but none pass the net-edge test after costs.
+The same 80-match table-tennis sweep returned 29.22% at `0.10`, 9.50% at
+`0.50`, 1.64% at `0.75`, and 0.00% at `1.00`.
 
 That bottom row is the honesty check. If a change ever makes it profitable,
 you've found a bug, not an edge.
@@ -121,6 +132,9 @@ you saw. This one refuses:
   traded through to clear the shares resting ahead of them.
 - **Adverse selection shows up.** A resting order that the market trades through
   gets filled at its now-stale price.
+- **Current fees are charged.** Live mode reads each market's fee schedule from
+  Gamma. Simulation defaults to a 0.05 taker-rate curve, and the risk gate budgets
+  for both the entry and exit fee before calling an edge profitable.
 - **Two equity numbers.** `equity` marks at the mid; `liquidation_equity` marks at
   the bid. On thin in-play books the gap between them is often the entire paper
   profit. The report shows both and labels the second one "the honest number".
@@ -152,7 +166,7 @@ pmpt/
     risk.py                 Kelly sizing, exposure caps, kill switches
 docs/
   index.html                dashboard (also the GitHub Pages site)
-tests/                      129 unit tests, stdlib unittest only
+tests/                      137 unit tests, stdlib unittest only
 ```
 
 ### The models
@@ -188,18 +202,18 @@ artifact.
 On a $100 bankroll what kills you isn't a bad model, it's one oversized position
 in a market you misread. Every trade must survive all of:
 
-**Sizing** — fractional Kelly (default 0.10×), capped at 5% of equity per trade,
-8% per market, 20% total exposure.
+**Sizing** — fractional Kelly (0.15×), capped at 5% of equity per trade, 6% per
+market, 40% total exposure, and 12 simultaneous positions.
 
-**Entry filters** — minimum 2% edge *after* assumed slippage and fees; spread
-under 3c; at least 50 shares of depth; book fresher than 5s; price between 0.05
-and 0.95 (the tails have asymmetric resolution risk and illusory edges); signal
-younger than 15s.
+**Entry filters** — minimum 1.2% edge *after* assumed slippage and both expected
+taker fees; spread under 4c; at least 20 shares of depth; book fresher than 5s;
+price between 0.05 and 0.95; signal younger than 12s.
 
-**Exits** — bank small bid-side profits quickly, take scratch profits after a
-short hold, bail when the model edge disappears, and cut losses at 6c.
+**Exits** — bank 0.4c net profit per share quickly, take a 0.1c net scratch
+profit after 10 seconds, bail when the model edge disappears, cap holds at 90
+seconds, and cut losses at 5c.
 
-**Kill switches** — 12% max drawdown, 8% daily loss limit, $20 equity floor.
+**Kill switches** — 15% max drawdown, 10% daily loss limit, $20 equity floor.
 Once tripped, trading stops permanently for the session.
 
 It also **refuses to trade a match it didn't see from the start**, because
@@ -248,10 +262,12 @@ Everything is in `config.yaml`. The knobs that matter most:
 | `broker.latency_ms` | The single biggest realism lever. Raise it if unsure. |
 | `strategy.signal_ttl_ms` | How long after a score change you believe an edge is real. |
 | `strategy.model_weight` | 1.0 trusts the model fully; lower shrinks toward the market. |
+| `strategy.pregame_reanchor_threshold` | Refreshes the baseline after a meaningful pregame line move. |
 | `strategy.quick_take_profit` | Bid-side profit threshold for taking a fast scalp. |
 | `strategy.scratch_profit` | Tiny profit target after the trade has been open briefly. |
+| `broker.passive_entries` | Passive mode is available, but disabled after adverse-selection stress tests. |
 | `risk.kelly_fraction` | Full Kelly on an unvalidated model empties the account. |
-| `risk.min_edge` | Must exceed real costs or you're paying the spread for fun. |
+| `risk.min_edge` | Remaining edge required after slippage and expected fees. |
 
 ---
 

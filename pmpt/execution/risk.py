@@ -102,10 +102,22 @@ class RiskManager:
 
     # -- entry gate --------------------------------------------------------
 
-    def net_edge(self, signal: Signal) -> float:
+    def net_edge(
+        self,
+        signal: Signal,
+        market: TradableMarket | None = None,
+        taker_legs: int = 2,
+    ) -> float:
         """Edge after the costs we expect to actually pay."""
         cfg = self.cfg
-        fee = cfg.taker_fee_rate * min(signal.market_price, 1 - signal.market_price)
+        if market is not None and market.fees_enabled:
+            rate = market.fee_rate or cfg.taker_fee_rate
+        elif market is not None:
+            rate = 0.0
+        else:
+            rate = cfg.taker_fee_rate
+        p = signal.market_price
+        fee = max(0, taker_legs) * rate * p * (1.0 - p)
         return signal.edge - cfg.assumed_slippage - fee
 
     def approve(
@@ -118,6 +130,7 @@ class RiskManager:
         spread: float | None,
         depth: float,
         ts_ms: int,
+        taker_legs: int = 2,
     ) -> tuple[bool, str]:
         cfg = self.cfg
 
@@ -136,7 +149,7 @@ class RiskManager:
         if depth < cfg.min_book_depth:
             return False, f"depth {depth:.0f} below {cfg.min_book_depth:.0f}"
 
-        ne = self.net_edge(signal)
+        ne = self.net_edge(signal, market, taker_legs)
         if ne < cfg.min_edge:
             return False, f"net edge {ne:.4f} < {cfg.min_edge:.4f}"
 

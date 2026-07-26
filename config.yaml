@@ -3,15 +3,15 @@
 
 run:
   starting_cash: 100.0
-  sports: [tennis]            # tennis | table_tennis
-  live_only: true             # only trade matches actually in progress
-  discovery_interval_s: 180
-  mark_interval_s: 15
-  status_interval_s: 60
+  sports: [table_tennis, tennis]
+  live_only: false            # discover pregame anchors; orders still require live scores
+  discovery_interval_s: 60
+  mark_interval_s: 5
+  status_interval_s: 30
   state_dir: state
   log_level: INFO
   max_runtime_s: 0            # 0 = run until Ctrl-C
-  max_tracked_markets: 40
+  max_tracked_markets: 120
   github_live_enabled: true   # public Pages dashboard follows this process
   github_live_interval_s: 30
   github_live_remote: origin
@@ -22,55 +22,57 @@ broker:
   # connection is slow -- it is the single most important realism knob.
   latency_ms: 250
   latency_jitter_ms: 100
-  taker_fee_rate: 0.0         # Polymarket sports markets currently run fee-free
+  taker_fee_rate: 0.05        # simulation fallback; live uses each market's feeSchedule
   maker_fee_rate: 0.0
-  max_level_participation: 0.5
+  passive_entries: false      # tested passive fills were adversely selected
+  max_level_participation: 0.35
   miss_probability: 0.05
-  passive_ttl_ms: 30000
+  passive_ttl_ms: 8000
 
 risk:
   # Sizing. These are deliberately tight for a $100 bankroll.
-  kelly_fraction: 0.10        # fraction of full Kelly
-  max_position_pct: 0.05      # most of equity in one trade
-  max_market_exposure_pct: 0.08
-  max_total_exposure_pct: 0.20
+  kelly_fraction: 0.15        # aggressive frequency, still fractional Kelly
+  max_position_pct: 0.05      # at most 5% of equity in one trade
+  max_market_exposure_pct: 0.06
+  max_total_exposure_pct: 0.40
   min_order_shares: 5         # Polymarket's own minimum
-  max_order_shares: 500
+  max_order_shares: 50
 
   # Entry filters.
-  min_edge: 0.02              # net of assumed slippage and fees
-  min_confidence: 0.65
-  max_spread: 0.03
-  min_book_depth: 50
+  min_edge: 0.012             # remaining edge after slippage and two taker fees
+  min_confidence: 0.55
+  max_spread: 0.04
+  min_book_depth: 20
   max_book_age_ms: 5000
   min_price: 0.05             # stay out of the tails
   max_price: 0.95
 
   # Portfolio limits.
-  max_concurrent_positions: 5
+  max_concurrent_positions: 12
   max_positions_per_market: 1
-  cooldown_ms: 30000
+  cooldown_ms: 5000
 
   # Kill switches. If any of these trip, trading stops for good.
-  max_drawdown_pct: 0.12
-  daily_loss_limit_pct: 0.08
+  max_drawdown_pct: 0.15
+  daily_loss_limit_pct: 0.10
   min_equity: 20.0
 
-  assumed_slippage: 0.005
+  assumed_slippage: 0.003
 
 strategy:
-  signal_ttl_ms: 15000        # how long after a score change an edge is real
-  reanchor_halflife_s: 300    # pull the anchor toward the market over time
+  signal_ttl_ms: 12000        # how long after a score change an edge is real
+  reanchor_halflife_s: 180    # pull the anchor toward the market over time
   max_games_at_anchor: 2      # refuse matches we did not see from the start
+  pregame_reanchor_threshold: 0.01
   anchor_min_price: 0.08
   anchor_max_price: 0.92
   take_profit_edge: 0.005
-  quick_take_profit: 0.015
-  scratch_profit: 0.005
-  scratch_profit_after_ms: 15000
-  max_hold_ms: 120000
-  exit_edge_buffer: 0.005
-  stop_loss: 0.06
+  quick_take_profit: 0.004    # net per share after entry and exit fees
+  scratch_profit: 0.001
+  scratch_profit_after_ms: 10000
+  max_hold_ms: 90000
+  exit_edge_buffer: 0.003
+  stop_loss: 0.05
   hold_to_resolution: false
   surface: unknown            # hard | clay | grass | unknown
-  model_weight: 0.60          # 1.0 = pure model, lower shrinks toward market
+  model_weight: 0.70          # more aggressive, still shrunk toward the market

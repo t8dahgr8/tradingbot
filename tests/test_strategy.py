@@ -7,8 +7,16 @@ edge.
 """
 
 import unittest
+from unittest.mock import patch
 
-from pmpt.data.gamma import _best_of_from_event, _parse_json_field, market_from_gamma
+from pmpt.config import AppConfig
+from pmpt.data.gamma import (
+    GammaClient,
+    _best_of_from_event,
+    _parse_json_field,
+    market_from_gamma,
+)
+from pmpt.engine import TradingEngine, _balanced_markets
 from pmpt.models import Level, OrderBook, Side, TradableMarket
 from pmpt.simulate import SimConfig, run_simulation
 from pmpt.strategy.live_model import LiveModelStrategy, StrategyConfig
@@ -173,6 +181,25 @@ class TestExits(unittest.TestCase):
         self.assertTrue(should)
         self.assertIn("bank profit", why)
 
+    def test_gross_one_tick_gain_is_not_profit_after_live_fee(self):
+        self.m.fees_enabled = True
+        self.m.fee_rate = 0.05
+        self.s.cfg.quick_take_profit = 0.004
+        self.s.on_score(self.m, "6-0, 5-0", "2", True, False, ts=10_000)
+
+        one_tick = books(0.52, ts=10_000)[T0]  # bid .51 vs .50 entry
+        should, _ = self.s.exit_signal(
+            self.m, T0, 0.50, one_tick, opened_ms=9_000, ts=10_000
+        )
+        self.assertFalse(should)
+
+        two_ticks = books(0.53, ts=10_000)[T0]  # bid .52 clears exit fee
+        should, why = self.s.exit_signal(
+            self.m, T0, 0.50, two_ticks, opened_ms=9_000, ts=10_000
+        )
+        self.assertTrue(should)
+        self.assertIn("bank profit", why)
+
     def test_scratch_profit_after_short_hold_is_taken(self):
         cfg = StrategyConfig(model_weight=1.0, quick_take_profit=1.0, scratch_profit_after_ms=5_000)
         s = LiveModelStrategy(cfg)
@@ -239,12 +266,18 @@ class TestGammaParsing(unittest.TestCase):
             "slug": "x-vs-y", "enableOrderBook": True, "acceptingOrders": True,
             "clobTokenIds": '["111", "222"]', "outcomes": '["X", "Y"]',
             "orderPriceMinTickSize": 0.001, "orderMinSize": 5,
+            "feesEnabled": True, "feeSchedule": {"rate": 0.05},
         }
         m = market_from_gamma(raw, {"slug": "wta-x-vs-y", "gameId": 42})
         self.assertEqual(m.token_ids, ("111", "222"))
         self.assertEqual(m.outcomes, ("X", "Y"))
         self.assertEqual(m.tick_size, 0.001)
         self.assertEqual(m.game_id, 42)
+        self.assertTrue(m.fees_enabled)
+        self.assertEqual(m.fee_rate, 0.05)
+
+        tt_market = market_from_gamma(raw, {"slug": "wtt-x-vs-y"}, "table_tennis")
+        self.assertEqual(tt_market.best_of, 5)
 
     def test_market_without_orderbook_is_skipped(self):
         raw = {"id": "1", "clobTokenIds": '["1","2"]', "outcomes": '["A","B"]',
@@ -255,6 +288,77 @@ class TestGammaParsing(unittest.TestCase):
         self.assertEqual(_best_of_from_event({"slug": "atp-wimbledon-x-vs-y"}), 5)
         self.assertEqual(_best_of_from_event({"slug": "wta-wimbledon-x-vs-y"}), 3)
         self.assertEqual(_best_of_from_event({"slug": "atp-shanghai-x-vs-y"}), 3)
+
+
+class TestGammaDiscovery(unittest.TestCase):
+    def test_event_query_uses_bounded_current_windows(self):
+        with patch(
+            "pmpt.data.gamma._get",
+            side_effect=[[], [], {"events": []}],
+        ) as get:
+            GammaClient(["table_tennis"]).fetch_events("table_tennis")
+
+        near = get.call_args_list[0].args[1]
+        future = get.call_args_list[1].args[1]
+        self.assertEqual(near["ascending"], "false")
+        self.assertEqual(future["ascending"], "true")
+        self.assertTrue(near["start_date_min"].endswith("Z"))
+        self.assertTrue(near["start_date_max"].endswith("Z"))
+        self.assertLess(near["start_date_min"], near["start_date_max"])
+        self.assertEqual(near["start_date_max"], future["start_date_min"])
+
+    def test_refresh_skips_events_without_score_stream_id(self):
+        client = GammaClient(["table_tennis"])
+        event = {
+            "id": "e1",
+            "gameId": None,
+            "markets": [{
+                "id": "m1",
+                "enableOrderBook": True,
+                "acceptingOrders": True,
+                "clobTokenIds": '["a","b"]',
+                "outcomes": '["A","B"]',
+            }],
+        }
+        with patch.object(client, "fetch_events", return_value=[event]):
+            self.assertEqual(client.refresh(), [])
+
+    def test_watchlist_round_robins_sports(self):
+        items = []
+        for sport, count in (("table_tennis", 5), ("tennis", 2)):
+            for i in range(count):
+                item = market(sport=sport)
+                item.market_id = f"{sport}-{i}"
+                items.append(item)
+
+        selected = _balanced_markets(items, ["table_tennis", "tennis"], 5)
+        self.assertEqual(
+            [m.market_id for m in selected],
+            [
+                "table_tennis-0",
+                "tennis-0",
+                "table_tennis-1",
+                "tennis-1",
+                "table_tennis-2",
+            ],
+        )
+
+
+class TestLiveAnchorGuard(unittest.IsolatedAsyncioTestCase):
+    async def test_first_late_score_invalidates_pregame_anchor(self):
+        engine = TradingEngine(AppConfig())
+        item = market()
+        engine.gamma.markets[item.market_id] = item
+        engine.strategy.set_anchor(item, 0.55, ts=1_000)
+
+        await engine._on_game({
+            "gameId": item.game_id,
+            "score": "3-2",
+            "period": "1",
+            "live": True,
+        })
+
+        self.assertFalse(engine.strategy.trackers[item.market_id].anchored_cleanly)
 
 
 class TestEndToEnd(unittest.TestCase):
