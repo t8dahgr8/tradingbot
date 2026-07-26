@@ -90,6 +90,7 @@ def build_snapshot(engine) -> dict:
 
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "online": True,
         "mode": "paper",
         "stats": stats,
         "liquidation_equity": round(pf.liquidation_equity(bids), 2),
@@ -140,8 +141,36 @@ def write_snapshot(engine, state_dir: str, publish_dir: str | None = DOCS_DIR) -
     os.replace(tmp, path)  # atomic, so the server never reads a half-written file
 
     if publish_dir and os.path.isdir(publish_dir):
-        with open(os.path.join(publish_dir, SNAPSHOT_NAME), "w", encoding="utf-8") as fh:
-            json.dump(snap, fh, indent=2)
+        _write_json_atomic(os.path.join(publish_dir, SNAPSHOT_NAME), snap)
+
+
+def mark_snapshot_offline(
+    state_dir: str,
+    publish_dir: str | None = DOCS_DIR,
+) -> None:
+    """Mark the last paper snapshot offline after a clean shutdown."""
+    stopped_at = datetime.now(timezone.utc).isoformat()
+    for directory in (state_dir, publish_dir):
+        if not directory:
+            continue
+        path = os.path.join(directory, SNAPSHOT_NAME)
+        try:
+            with open(path, encoding="utf-8") as fh:
+                snap = json.load(fh)
+            if snap.get("mode") != "paper":
+                continue
+            snap["online"] = False
+            snap["stopped_at"] = stopped_at
+            _write_json_atomic(path, snap)
+        except (OSError, json.JSONDecodeError) as exc:
+            log.warning("could not mark dashboard offline: %s", exc)
+
+
+def _write_json_atomic(path: str, payload: dict) -> None:
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as fh:
+        json.dump(payload, fh, indent=2)
+    os.replace(tmp, path)
 
 
 def snapshot_from_simulation(result, portfolio) -> dict:
@@ -153,6 +182,7 @@ def snapshot_from_simulation(result, portfolio) -> dict:
     stats = portfolio.stats({})
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "online": False,
         "mode": "simulation",
         "stats": stats,
         "liquidation_equity": round(portfolio.cash, 2),

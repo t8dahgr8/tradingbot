@@ -12,6 +12,10 @@ run:
   log_level: INFO
   max_runtime_s: 0            # 0 = run until Ctrl-C
   max_tracked_markets: 40
+  github_live_enabled: true   # public Pages dashboard follows this process
+  github_live_interval_s: 30
+  github_live_remote: origin
+  github_live_branch: live-data
 
 broker:
   # Round trip from decision to order resting on the book. Raise this if your

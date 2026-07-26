@@ -28,6 +28,10 @@ class RunConfig:
     log_level: str = "INFO"
     max_runtime_s: int = 0          # 0 = run until stopped
     max_tracked_markets: int = 40
+    github_live_enabled: bool = True
+    github_live_interval_s: int = 30
+    github_live_remote: str = "origin"
+    github_live_branch: str = "live-data"
 
 
 @dataclass

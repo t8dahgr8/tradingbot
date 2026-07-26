@@ -79,6 +79,9 @@ class TradingEngine:
         if cfg.max_runtime_s:
             self._tasks.append(asyncio.create_task(self._deadline(cfg.max_runtime_s)))
 
+        # Announce the session immediately; the normal mark loop refreshes it.
+        self._publish()
+
         try:
             await self._stop.wait()
         finally:
