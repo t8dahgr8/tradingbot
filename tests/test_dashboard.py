@@ -7,11 +7,28 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from pmpt.dashboard import _write_json_atomic, mark_snapshot_offline
+from pmpt.config import AppConfig
+from pmpt.dashboard import _write_json_atomic, build_snapshot, mark_snapshot_offline
+from pmpt.engine import TradingEngine
 from pmpt.github_live import GitHubLivePublisher
 
 
 class TestDashboardStatus(unittest.TestCase):
+    def test_hft_snapshot_exposes_mode_and_quote_telemetry(self):
+        with tempfile.TemporaryDirectory() as root:
+            cfg = AppConfig()
+            cfg.run.mode = "hft"
+            cfg.run.state_dir = os.path.join(root, "state")
+            engine = TradingEngine(cfg)
+
+            snapshot = build_snapshot(engine)
+
+            self.assertEqual(snapshot["mode"], "hft")
+            self.assertEqual(snapshot["execution"], "paper")
+            self.assertEqual(snapshot["open_orders"], [])
+            self.assertEqual(snapshot["hft"]["active_quotes"], 0)
+            self.assertIn("quote_cycles_per_min", snapshot["hft"])
+
     def test_atomic_snapshot_retries_windows_file_contention(self):
         with tempfile.TemporaryDirectory() as root:
             path = os.path.join(root, "data.json")
@@ -67,6 +84,17 @@ class TestDashboardStatus(unittest.TestCase):
 
             with open(path, encoding="utf-8") as fh:
                 self.assertEqual(json.load(fh), payload)
+
+    def test_clean_shutdown_marks_hft_snapshot_offline(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = os.path.join(root, "data.json")
+            with open(path, "w", encoding="utf-8") as fh:
+                json.dump({"mode": "hft", "online": True}, fh)
+
+            mark_snapshot_offline(root, None)
+
+            with open(path, encoding="utf-8") as fh:
+                self.assertFalse(json.load(fh)["online"])
 
 
 class TestGitHubLivePublisher(unittest.TestCase):

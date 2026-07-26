@@ -4,6 +4,7 @@
 run:
   starting_cash: 100.0
   sports: [table_tennis, tennis]
+  mode: hft                     # passive high-frequency paper market maker
   live_only: false            # discover pregame anchors; orders still require live scores
   discovery_interval_s: 60
   mark_interval_s: 5
@@ -27,7 +28,7 @@ broker:
   passive_entries: false      # tested passive fills were adversely selected
   max_level_participation: 0.35
   miss_probability: 0.05
-  passive_ttl_ms: 8000
+  passive_ttl_ms: 30000       # preserve queue position; score changes cancel sooner
 
 risk:
   # Sizing. These are deliberately tight for a $100 bankroll.
@@ -76,3 +77,22 @@ strategy:
   hold_to_resolution: false
   surface: unknown            # hard | clay | grass | unknown
   model_weight: 0.70          # more aggressive, still shrunk toward the market
+
+market_maker:
+  quote_refresh_ms: 350       # at most one reconciliation per market this often
+  score_pause_ms: 1500        # pull every quote immediately after a score change
+  max_score_age_ms: 60000     # a point can legitimately last tens of seconds
+  max_book_age_ms: 15000      # unchanged books remain usable while feeds are healthy
+  quote_size_shares: 5
+  min_spread_ticks: 1         # join a one-tick spread; never cross it
+  max_spread: 0.06
+  min_quote_edge: 0.003
+  min_exit_profit: 0.004
+  inventory_skew_ticks: 1.0
+  soft_inventory_age_ms: 30000
+  hard_inventory_age_ms: 90000
+  hard_stop: 0.05
+  max_inventory_token_pct: 0.05
+  max_inventory_market_pct: 0.08
+  max_total_inventory_pct: 0.25
+  max_live_markets: 12

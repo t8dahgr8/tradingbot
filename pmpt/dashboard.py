@@ -24,6 +24,8 @@ import time
 from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
+from .models import OrderType
+
 log = logging.getLogger(__name__)
 
 DOCS_DIR = "docs"
@@ -36,6 +38,11 @@ def build_snapshot(engine) -> dict:
     marks = engine._marks()
     bids = engine._bids()
     stats = pf.stats(marks)
+    snapshot_ms = json_now_ms()
+    runtime_ms = max(
+        0,
+        snapshot_ms - engine.started_ms,
+    ) if engine.started_ms else 0
 
     positions = []
     for token, p in pf.positions.items():
@@ -73,6 +80,24 @@ def build_snapshot(engine) -> dict:
             continue
         m = t.market
         b0 = engine.broker.book(m.token_ids[0])
+        base_tradeable = t.anchored_cleanly and t.score_tradeable
+        hft_score_armed = bool(t.last_score_change_ms)
+        hft_score_fresh = (
+            hft_score_armed
+            and t.score_age_ms(snapshot_ms)
+            <= engine.cfg.market_maker.max_score_age_ms
+        )
+        tradeable = base_tradeable and (
+            engine.mode != "hft" or hft_score_fresh
+        )
+        if not base_tradeable:
+            trade_status = t.score_issue or "late or invalid anchor"
+        elif engine.mode == "hft" and not hft_score_armed:
+            trade_status = "waiting for next score"
+        elif engine.mode == "hft" and not hft_score_fresh:
+            trade_status = "stale score"
+        else:
+            trade_status = "ready"
         tracked.append({
             "market": m.question,
             "outcomes": list(m.outcomes),
@@ -81,18 +106,58 @@ def build_snapshot(engine) -> dict:
             "model": round(t.fair_value, 4) if t.fair_value is not None else None,
             "market_price": round(b0.mid, 4) if (b0 and b0.mid is not None) else None,
             "anchor": round(t.anchor_prob, 4) if t.anchor_prob is not None else None,
-            "tradeable": t.anchored_cleanly and t.score_tradeable,
-            "trade_status": (
-                "ready"
-                if t.anchored_cleanly and t.score_tradeable
-                else t.score_issue or "late anchor"
-            ),
+            "tradeable": tradeable,
+            "trade_status": trade_status,
         })
 
     equity = [
         {"t": p.ts_ms, "equity": round(p.equity, 4), "cash": round(p.cash, 4)}
         for p in pf.equity_curve[-600:]
     ]
+
+    pending_ids = {order.order_id for order in engine.broker.pending}
+    open_orders = []
+    for order in engine.broker.live_orders():
+        if order.order_type != OrderType.PASSIVE:
+            continue
+        m = engine.gamma.by_token.get(order.token_id)
+        open_orders.append({
+            "order_id": order.order_id,
+            "label": (
+                m.outcomes[m.index_of(order.token_id)]
+                if m
+                else order.token_id[:10]
+            ),
+            "market": m.question if m else "",
+            "side": order.side.value,
+            "price": round(order.limit_price, 4),
+            "remaining": round(order.remaining, 2),
+            "queue_ahead": round(order.queue_ahead, 2),
+            "state": "pending" if order.order_id in pending_ids else "resting",
+            "age_ms": max(0, snapshot_ms - order.created_ms),
+            "reason": order.reason,
+        })
+    open_orders.sort(key=lambda order: (order["market"], order["label"], order["side"]))
+
+    mm_stats = engine.market_maker.stats
+    mm_fills = mm_stats.maker_fills + mm_stats.taker_fills
+    hft = {
+        "quote_cycles": mm_stats.quote_cycles,
+        "quotes_sent": mm_stats.quotes_sent,
+        "quotes_cancelled": mm_stats.quotes_cancelled,
+        "score_cancels": mm_stats.score_cancels,
+        "maker_fills": mm_stats.maker_fills,
+        "taker_fills": mm_stats.taker_fills,
+        "maker_fill_pct": round(
+            100.0 * mm_stats.maker_fills / mm_fills,
+            1,
+        ) if mm_fills else 0.0,
+        "active_quotes": len(open_orders),
+        "quote_cycles_per_min": round(
+            60_000.0 * mm_stats.quote_cycles / runtime_ms,
+            1,
+        ) if runtime_ms else 0.0,
+    }
 
     markets_by_sport: dict[str, int] = {}
     market_game_ids: set[int] = set()
@@ -111,11 +176,11 @@ def build_snapshot(engine) -> dict:
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "online": True,
-        "mode": "paper",
+        "mode": engine.mode,
+        "execution": "paper",
         "stats": stats,
         "liquidation_equity": round(pf.liquidation_equity(bids), 2),
-        "runtime_minutes": round((engine.started_ms and
-                                  (json_now_ms() - engine.started_ms) / 60000) or 0, 1),
+        "runtime_minutes": round(runtime_ms / 60_000, 1),
         "signals": engine.signals_seen,
         "orders": engine.orders_sent,
         "halted": engine.risk.state.halted,
@@ -140,6 +205,8 @@ def build_snapshot(engine) -> dict:
             "matched_live_games": len(market_game_ids & live_score_ids),
         },
         "positions": positions,
+        "open_orders": open_orders,
+        "hft": hft,
         "trades": trades,
         "tracked": tracked,
         "rejections": dict(sorted(engine.rejections.items(), key=lambda x: -x[1])[:10]),
@@ -184,7 +251,7 @@ def mark_snapshot_offline(
         try:
             with open(path, encoding="utf-8") as fh:
                 snap = json.load(fh)
-            if snap.get("mode") != "paper":
+            if snap.get("mode") not in {"paper", "scalp", "hft"}:
                 continue
             snap["online"] = False
             snap["stopped_at"] = stopped_at
@@ -227,6 +294,7 @@ def snapshot_from_simulation(result, portfolio) -> dict:
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "online": False,
         "mode": "simulation",
+        "execution": "paper",
         "stats": stats,
         "liquidation_equity": round(portfolio.cash, 2),
         "runtime_minutes": 0,
@@ -237,6 +305,8 @@ def snapshot_from_simulation(result, portfolio) -> dict:
         "feeds": {"market": {"connected": False, "reconnects": 0},
                   "sports": {"connected": False, "reconnects": 0}},
         "positions": [],
+        "open_orders": [],
+        "hft": {},
         "trades": [
             {
                 "time": f"#{i}",

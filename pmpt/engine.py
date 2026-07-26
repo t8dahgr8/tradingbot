@@ -23,6 +23,7 @@ from .execution.portfolio import Portfolio
 from .execution.risk import RiskManager
 from .models import Fill, Order, OrderBook, OrderType, Side, TradableMarket, now_ms
 from .strategy.live_model import LiveModelStrategy
+from .strategy.market_maker import HftMarketMaker, QuoteIntent
 
 log = logging.getLogger(__name__)
 
@@ -63,6 +64,10 @@ class TradingEngine:
         )
         self.risk = RiskManager(config.risk)
         self.strategy = LiveModelStrategy(config.strategy)
+        self.mode = str(config.run.mode).lower()
+        if self.mode not in ("scalp", "hft"):
+            raise ValueError(f"unsupported trading mode: {config.run.mode!r}")
+        self.market_maker = HftMarketMaker(config.market_maker, self.strategy)
 
         self.market_feed: MarketFeed | None = None
         self.sports_feed: SportsFeed | None = None
@@ -78,8 +83,8 @@ class TradingEngine:
     async def run(self) -> None:
         cfg = self.cfg.run
         log.info(
-            "starting paper trader | bankroll $%.2f | sports=%s | live_only=%s",
-            cfg.starting_cash, ",".join(cfg.sports), cfg.live_only,
+            "starting paper trader | mode=%s | bankroll $%.2f | sports=%s | live_only=%s",
+            self.mode, cfg.starting_cash, ",".join(cfg.sports), cfg.live_only,
         )
 
         await self._discover()
@@ -100,6 +105,10 @@ class TradingEngine:
             asyncio.create_task(self._discovery_loop(), name="discovery"),
             asyncio.create_task(self._housekeeping_loop(), name="housekeeping"),
         ]
+        if self.mode == "hft":
+            self._tasks.append(
+                asyncio.create_task(self._market_maker_loop(), name="hft-quoter")
+            )
         if cfg.max_runtime_s:
             self._tasks.append(asyncio.create_task(self._deadline(cfg.max_runtime_s)))
         for task in self._tasks:
@@ -271,8 +280,13 @@ class TradingEngine:
         await self._evaluate(market)
 
     async def _on_trade(self, token_id: str, price: float, size: float, ts: int) -> None:
-        for f in self.broker.on_trade(token_id, price, size, ts):
+        fills = self.broker.on_trade(token_id, price, size, ts)
+        for f in fills:
             self._book_fill(f)
+        if self.mode == "hft" and fills:
+            market = self.gamma.by_token.get(token_id)
+            if market is not None:
+                await self._evaluate(market, force_hft=True)
 
     async def _on_game(self, game: dict) -> None:
         """A live score arrived. This is the event the whole strategy waits for."""
@@ -292,6 +306,16 @@ class TradingEngine:
 
         for m in markets:
             tracker = self.strategy.trackers.get(m.market_id)
+            changed = (
+                tracker is None
+                or score != tracker.last_score
+                or period != tracker.last_period
+            )
+            if self.mode == "hft" and changed:
+                cancelled = self._cancel_hft_quotes(m)
+                if cancelled:
+                    self.market_maker.stats.score_cancels += cancelled
+                self.market_maker.on_score_change(m.market_id, now_ms())
             if (
                 tracker is not None
                 and live
@@ -315,7 +339,7 @@ class TradingEngine:
             if ended:
                 await self._flatten(m, "match ended")
             else:
-                await self._evaluate(m)
+                await self._evaluate(m, force_hft=changed)
 
     def _try_late_anchor_from_book(self, market: TradableMarket) -> bool:
         tracker = self.strategy.trackers.get(market.market_id)
@@ -344,6 +368,8 @@ class TradingEngine:
         if market:
             label = f"{market.outcomes[market.index_of(fill.token_id)]} ({market.slug})"
         self.portfolio.apply_fill(fill, market.market_id if market else "", label)
+        if self.mode == "hft":
+            self.market_maker.record_fill(fill.liquidity)
         log.info(
             "FILL %s %s %.0f @ %.4f (%s) fee=%.4f cash=%.2f",
             fill.side.value, label or fill.token_id[:10], fill.size, fill.price,
@@ -367,16 +393,26 @@ class TradingEngine:
             out[token] = b.best_bid if (b and b.best_bid is not None) else 0.0
         return out
 
-    async def _evaluate(self, market: TradableMarket) -> None:
+    async def _evaluate(
+        self,
+        market: TradableMarket,
+        force_hft: bool = False,
+    ) -> None:
         ts = now_ms()
         marks = self._marks()
         day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         if self.risk.check_halt(self.portfolio, marks, day):
-            self.broker.cancel_all(side=Side.BUY)
+            if self.mode == "hft":
+                self._cancel_hft_quotes()
+            else:
+                self.broker.cancel_all(side=Side.BUY)
             return
 
         books = {t: self.broker.book(t) for t in market.token_ids}
         books = {k: v for k, v in books.items() if v is not None}
+        if self.mode == "hft":
+            await self._evaluate_hft(market, books, marks, ts, force_hft)
+            return
 
         # Exits first: getting out is more urgent than getting in.
         for token in market.token_ids:
@@ -464,6 +500,115 @@ class TradingEngine:
             order.limit_price, signal.edge, signal.confidence, signal.reason,
         )
 
+    async def _evaluate_hft(
+        self,
+        market: TradableMarket,
+        books: dict[str, OrderBook],
+        marks: dict[str, float],
+        ts: int,
+        force: bool,
+    ) -> None:
+        if not self.market_maker.begin_cycle(market.market_id, ts, force=force):
+            return
+        self.signals_seen += 1
+
+        for token_id in market.token_ids:
+            pos = self.portfolio.positions.get(token_id)
+            book = books.get(token_id)
+            if pos is None or book is None:
+                continue
+            why = self.market_maker.force_exit_reason(
+                market, token_id, pos, book, ts
+            )
+            if why:
+                self._cancel_hft_quotes(market)
+                await self._close(market, token_id, why)
+                self.orders_sent += 1
+                return
+
+        intents, why = self.market_maker.quote_intents(
+            market,
+            books,
+            self.portfolio,
+            self.broker,
+            marks,
+            ts,
+        )
+        self._reconcile_hft_quotes(market, intents, ts)
+        if why != "ok":
+            self.rejections[why] = self.rejections.get(why, 0) + 1
+
+    def _reconcile_hft_quotes(
+        self,
+        market: TradableMarket,
+        intents: list[QuoteIntent],
+        ts: int,
+    ) -> None:
+        desired = {(intent.token_id, intent.side): intent for intent in intents}
+        current = [
+            order
+            for order in self.broker.live_orders()
+            if order.market_id == market.market_id
+            and order.order_type == OrderType.PASSIVE
+        ]
+        kept: set[tuple[str, Side]] = set()
+
+        for order in current:
+            key = (order.token_id, order.side)
+            intent = desired.get(key)
+            matches = (
+                intent is not None
+                and key not in kept
+                and abs(order.limit_price - intent.price) < 1e-9
+                and order.remaining <= intent.size + 1e-9
+            )
+            if matches:
+                kept.add(key)
+                continue
+            if self.broker.cancel(order.order_id):
+                self.market_maker.stats.quotes_cancelled += 1
+
+        for key, intent in desired.items():
+            if key in kept:
+                continue
+            order = Order(
+                token_id=intent.token_id,
+                side=intent.side,
+                size=intent.size,
+                limit_price=intent.price,
+                order_type=OrderType.PASSIVE,
+                market_id=market.market_id,
+                reason=intent.reason,
+                created_ms=ts,
+            )
+            self.broker.submit(order, ts)
+            self.orders_sent += 1
+            self.market_maker.stats.quotes_sent += 1
+            log.debug(
+                "HFT QUOTE %s %.0f %s @%.4f | %s",
+                intent.side.value,
+                intent.size,
+                market.outcomes[market.index_of(intent.token_id)],
+                intent.price,
+                intent.reason,
+            )
+
+    def _cancel_hft_quotes(
+        self,
+        market: TradableMarket | None = None,
+        token_id: str | None = None,
+    ) -> int:
+        cancelled = 0
+        for order in list(self.broker.live_orders(token_id=token_id)):
+            if order.order_type != OrderType.PASSIVE:
+                continue
+            if market is not None and order.market_id != market.market_id:
+                continue
+            if self.broker.cancel(order.order_id):
+                cancelled += 1
+        self.market_maker.stats.quotes_cancelled += cancelled
+        return cancelled
+
     async def _close(self, market: TradableMarket, token_id: str, why: str) -> None:
         pos = self.portfolio.positions.get(token_id)
         if pos is None or pos.shares <= 0:
@@ -489,14 +634,41 @@ class TradingEngine:
                  market.outcomes[market.index_of(token_id)], why)
 
     async def _flatten(self, market: TradableMarket, why: str) -> None:
-        for token in market.token_ids:
-            self.broker.cancel_all(token, Side.BUY)
+        if self.mode == "hft":
+            self._cancel_hft_quotes(market)
+        else:
+            for token in market.token_ids:
+                self.broker.cancel_all(token, Side.BUY)
         if self.cfg.strategy.hold_to_resolution:
             return
         for token in market.token_ids:
             await self._close(market, token, why)
 
     # -- housekeeping ------------------------------------------------------
+
+    async def _market_maker_loop(self) -> None:
+        interval = max(0.05, self.cfg.market_maker.quote_refresh_ms / 1000)
+        while not self._stop.is_set():
+            with contextlib.suppress(asyncio.TimeoutError):
+                await asyncio.wait_for(self._stop.wait(), timeout=interval)
+            if self._stop.is_set():
+                break
+            trackers = sorted(
+                (
+                    tracker
+                    for tracker in self.strategy.trackers.values()
+                    if tracker.live and not tracker.ended
+                ),
+                key=lambda tracker: tracker.score_age_ms(),
+            )
+            for tracker in trackers[: self.cfg.market_maker.max_live_markets]:
+                try:
+                    await self._evaluate(tracker.market)
+                except Exception:  # noqa: BLE001 - keep quoting other markets
+                    log.exception(
+                        "HFT quote cycle failed for market %s",
+                        tracker.market.market_id,
+                    )
 
     async def _housekeeping_loop(self) -> None:
         cfg = self.cfg.run
@@ -512,7 +684,10 @@ class TradingEngine:
                 self.portfolio.mark(marks)
                 day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
                 if self.risk.check_halt(self.portfolio, marks, day):
-                    self.broker.cancel_all(side=Side.BUY)
+                    if self.mode == "hft":
+                        self._cancel_hft_quotes()
+                    else:
+                        self.broker.cancel_all(side=Side.BUY)
 
                 # The dashboard snapshot is cheap, so refresh it every mark rather
                 # than only on the slower status cadence.
@@ -539,8 +714,9 @@ class TradingEngine:
         s = self.portfolio.stats(marks)
         liq = self.portfolio.liquidation_equity(self._bids())
         log.info(
-            "STATUS equity=$%.2f (liq $%.2f) cash=$%.2f pos=%d exposure=$%.2f "
-            "realized=%+.2f dd=%.1f%% | signals=%d orders=%d",
+            "STATUS mode=%s equity=$%.2f (liq $%.2f) cash=$%.2f pos=%d exposure=$%.2f "
+            "realized=%+.2f dd=%.1f%% | cycles=%d orders=%d",
+            self.mode,
             s["equity"], liq, s["cash"], s["open_positions"], s["exposure"],
             s["realized_pnl"], s["max_drawdown_pct"], self.signals_seen, self.orders_sent,
         )
@@ -580,6 +756,15 @@ class TradingEngine:
             f"  Fills                {s['num_fills']:>10d}",
             f"  Open positions       {s['open_positions']:>10d}",
         ]
+        if self.mode == "hft":
+            mm = self.market_maker.stats
+            lines.extend([
+                f"  Quote cycles         {mm.quote_cycles:>10d}",
+                f"  Quotes sent          {mm.quotes_sent:>10d}",
+                f"  Quotes cancelled     {mm.quotes_cancelled:>10d}",
+                f"  Maker fills          {mm.maker_fills:>10d}",
+                f"  Taker exits          {mm.taker_fills:>10d}",
+            ])
         if self.risk.state.halted:
             lines.append(f"  HALTED: {self.risk.state.halt_reason}")
         if self.rejections:

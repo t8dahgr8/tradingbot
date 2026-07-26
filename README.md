@@ -8,6 +8,12 @@ the project**. It cannot place a real trade.
 
 Starting bankroll is $100 of imaginary money.
 
+The default live mode is now an **HFT-style paper market maker**. It evaluates
+live markets several hundred times per minute, but only sends an order when a
+passive quote should be added, moved, or cancelled. Quote cycles are not fills.
+Actual simulated fills still require public volume to clear the recorded queue.
+This is retail-speed market making, not colocated exchange HFT.
+
 ---
 
 ## The strategy, stated honestly
@@ -36,11 +42,11 @@ Concretely:
    injury, a medical timeout, a retirement. Fighting that with a Markov chain is
    how you lose money confidently.
 
-The aggressive profile watches up to 120 tennis and table-tennis match-winner
-markets, permits 12 simultaneous paper positions, and looks for many short
-scalps instead of one large payout. It still will not manufacture action: every
-entry must clear slippage, the market's live fee schedule, and a 0.8% remaining
-model edge.
+The HFT profile watches up to 120 tennis and table-tennis match-winner markets
+and actively quotes up to 12 live matches. It posts passive bids on complementary
+outcomes, offers acquired inventory one tick higher when possible, skews away
+from inventory, and cancels every working quote when the score changes. It still
+will not manufacture action: fills need real public trade volume.
 
 Pregame prices are refreshed after a material 1c move. That lets the anchor
 absorb public information such as withdrawals and injury news without pretending
@@ -62,7 +68,7 @@ python run.py simulate --matches 200
 
 # Live paper trading needs two packages.
 pip install -r requirements.txt
-python run.py live --minutes 60
+python run.py live --mode hft --minutes 60
 
 # Watch it in a browser (separate terminal).
 python run.py dashboard      # http://127.0.0.1:8000
@@ -74,11 +80,12 @@ python run.py dashboard      # http://127.0.0.1:8000
 |---|---|
 | `python run.py simulate` | Offline simulation. No network. |
 | `python run.py simulate --sweep` | **The important one.** Sweeps market speed to show where the edge dies. |
-| `python run.py live` | Paper trade real markets in real time. |
+| `python run.py live --mode hft` | Run the passive HFT-style paper market maker. |
+| `python run.py live --mode scalp` | Run the original score-lag paper scalper. |
 | `python run.py dashboard` | Web UI on `http://127.0.0.1:8000`. |
 | `python run.py markets` | List currently tradeable winner markets. |
 | `python run.py report` | Print the saved portfolio. |
-| `python -m unittest discover -s tests` | Run the test suite (142 tests). |
+| `python -m unittest discover -s tests` | Run the test suite (160 tests). |
 
 ---
 
@@ -161,13 +168,14 @@ pmpt/
     feeds.py                CLOB order book WS + sports score WS, auto-reconnect
   strategy/
     live_model.py           anchoring, repricing, signal generation, exits
+    market_maker.py         passive quotes, inventory skew, score-change pauses
   execution/
     paper_broker.py         simulated fills, latency, queues, fees
     portfolio.py            cash, positions, P&L, trade journal
     risk.py                 Kelly sizing, exposure caps, kill switches
 docs/
   index.html                dashboard (also the GitHub Pages site)
-tests/                      142 unit tests, stdlib unittest only
+tests/                      160 unit tests, stdlib unittest only
 ```
 
 ### The models
@@ -201,22 +209,27 @@ artifact.
 ## Risk controls
 
 On a $100 bankroll what kills you isn't a bad model, it's one oversized position
-in a market you misread. Every trade must survive all of:
+in a market you misread. The two execution modes use different gates:
 
-**Sizing** — fractional Kelly (0.15×), capped at 5% of equity per trade, 6% per
+**Scalp sizing** — fractional Kelly (0.15×), capped at 5% of equity per trade, 6% per
 market, 40% total exposure, and 12 simultaneous positions.
 
-**Entry filters** — minimum 0.8% edge *after* assumed slippage and both expected
+**Scalp entry filters** — minimum 0.8% edge *after* assumed slippage and both expected
 taker fees; confidence of at least 0.45; spread under 4c; at least 20 shares of
 depth; book fresher than 5s; price between 0.05 and 0.95; signal younger than
 12s.
 
-**Exits** — bank 0.4c net profit per share quickly, take a 0.1c net scratch
+**Scalp exits** — bank 0.4c net profit per share quickly, take a 0.1c net scratch
 profit after 10 seconds, bail when the model edge disappears, cap holds at 90
 seconds, and cut losses at 5c.
 
 **Kill switches** — 15% max drawdown, 10% daily loss limit, $20 equity floor.
 Once tripped, trading stops permanently for the session.
+
+**HFT inventory controls** - 5% of equity per outcome token, 8% per market,
+25% total maker inventory, five shares per quote, a 5c hard stop, and a
+90-second hard inventory timeout. A working inventory offer blocks another buy
+on that same token, preventing self-crossing quotes.
 
 It refuses to trade until it has either a clean pre-match anchor or a live anchor
 that round-trips the current score and winner price.
@@ -225,10 +238,9 @@ that round-trips the current score and winner price.
 
 ## The dashboard
 
-`python run.py dashboard` serves a live view: equity curve, open positions,
-recent fills, matches being tracked with model-vs-market side by side, feed
-health, and a breakdown of *why* signals were rejected — usually the most
-informative panel, since it tells you which filter is doing the work.
+`python run.py dashboard` serves a live view: equity curve, working quotes and
+queue position, maker/taker fills, quote actions, open positions, model versus
+market, feed health, and an exact breakdown of why quotes were skipped.
 
 The bot writes `state/data.json` continuously and mirrors it to `docs/data.json`.
 While live paper trading is running, it also publishes that snapshot to the
@@ -262,7 +274,12 @@ Everything is in `config.yaml`. The knobs that matter most:
 | Setting | Why it matters |
 |---|---|
 | `broker.latency_ms` | The single biggest realism lever. Raise it if unsure. |
-| `strategy.signal_ttl_ms` | How long after a score change you believe an edge is real. |
+| `run.mode` | `hft` for passive market making or `scalp` for the original taker strategy. |
+| `market_maker.quote_refresh_ms` | Minimum interval between quote reconciliations per market. |
+| `market_maker.min_quote_edge` | Required fair-value cushion for a passive bid. |
+| `market_maker.max_total_inventory_pct` | Portfolio-wide maker inventory ceiling. |
+| `market_maker.hard_inventory_age_ms` | Maximum time to carry unclosed maker inventory. |
+| `strategy.signal_ttl_ms` | How long after a score change the scalp mode considers an edge live. |
 | `strategy.model_weight` | 1.0 trusts the model fully; lower shrinks toward the market. |
 | `strategy.pregame_reanchor_threshold` | Refreshes the baseline after a meaningful pregame line move. |
 | `strategy.quick_take_profit` | Bid-side profit threshold for taking a fast scalp. |
@@ -284,6 +301,9 @@ Everything is in `config.yaml`. The knobs that matter most:
 - **In-play tennis is a competitive market.** Firms with colocated infrastructure
   and direct scoring feeds are trading this. A retail connection at 250ms is not
   a latency advantage, which is why the sweep matters so much.
+- **Fast quote evaluation does not create liquidity.** A paper order can remain
+  unfilled for minutes because it is behind real volume. Forcing marketable churn
+  would mainly add taker fees and adverse selection.
 - **Table tennis minor leagues have a documented match-fixing history.** Unusual
   pre-match volume is a red flag, and this system does not currently detect it.
 - **Paper trading omits the hardest part**: real fills change the book, and real
@@ -298,7 +318,7 @@ Everything is in `config.yaml`. The knobs that matter most:
 2. Point-level score data from a dedicated provider.
 3. Player-specific serve statistics instead of a surface-average anchor.
 4. Cross-market arbitrage against sportsbook prices.
-5. Passive market making once the fair-value model has proven itself.
+5. Cancel-latency and order-rate-limit modelling for a stricter maker stress test.
 
 ---
 

@@ -12,12 +12,14 @@ from typing import Any
 from .execution.paper_broker import BrokerConfig
 from .execution.risk import RiskConfig
 from .strategy.live_model import StrategyConfig
+from .strategy.market_maker import MarketMakerConfig
 
 
 @dataclass
 class RunConfig:
     starting_cash: float = 100.0
     sports: list[str] = field(default_factory=lambda: ["tennis"])
+    mode: str = "scalp"
     # Discover pregame markets so the model captures a clean winner-price anchor.
     # Signal generation still requires a live score, so this does not trade pregame.
     live_only: bool = False
@@ -40,6 +42,7 @@ class AppConfig:
     broker: BrokerConfig = field(default_factory=BrokerConfig)
     risk: RiskConfig = field(default_factory=RiskConfig)
     strategy: StrategyConfig = field(default_factory=StrategyConfig)
+    market_maker: MarketMakerConfig = field(default_factory=MarketMakerConfig)
 
     def to_dict(self) -> dict:
         return {
@@ -47,6 +50,7 @@ class AppConfig:
             "broker": asdict(self.broker),
             "risk": asdict(self.risk),
             "strategy": asdict(self.strategy),
+            "market_maker": asdict(self.market_maker),
         }
 
 
@@ -82,6 +86,7 @@ def load_config(path: str | None = None) -> AppConfig:
     _apply(cfg.broker, data.get("broker"))
     _apply(cfg.risk, data.get("risk"))
     _apply(cfg.strategy, data.get("strategy"))
+    _apply(cfg.market_maker, data.get("market_maker"))
 
     # Keep the fee assumption used for sizing consistent with the one the broker
     # actually charges. Silent disagreement here quietly inflates paper returns.
