@@ -168,16 +168,27 @@ class PaperBroker:
     def live_size(self, token_id: str | None = None, side: Side | None = None) -> float:
         """Shares already submitted and still able to fill."""
         total = 0.0
-        for bucket in (self.pending, self.resting):
-            for o in bucket:
-                if not o.is_live:
-                    continue
-                if token_id is not None and o.token_id != token_id:
-                    continue
-                if side is not None and o.side != side:
-                    continue
-                total += o.remaining
+        for order in self.live_orders(token_id, side):
+            total += order.remaining
         return total
+
+    def live_orders(
+        self,
+        token_id: str | None = None,
+        side: Side | None = None,
+    ) -> list[Order]:
+        """Snapshot of submitted orders that can still fill."""
+        orders: list[Order] = []
+        for bucket in (self.pending, self.resting):
+            for order in bucket:
+                if not order.is_live:
+                    continue
+                if token_id is not None and order.token_id != token_id:
+                    continue
+                if side is not None and order.side != side:
+                    continue
+                orders.append(order)
+        return orders
 
     # -- market data -------------------------------------------------------
 

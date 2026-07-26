@@ -3,77 +3,82 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Polymarket Paper Trader</title>
+<title>Polymarket Paper Market Maker</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   :root{
-    --bg:#0d1117; --panel:#161b22; --panel2:#1c2129; --line:#2a313c;
-    --txt:#e6edf3; --dim:#8b949e; --accent:#58a6ff;
-    --up:#3fb950; --down:#f85149; --warn:#d29922;
+    --bg:#101211;--panel:#181b19;--panel2:#202521;--line:#303631;
+    --txt:#edf1ee;--dim:#99a39c;--accent:#5cc8b5;
+    --up:#54c66f;--down:#ff6b66;--warn:#e1b64a;
     --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--txt);
        font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-  .wrap{max-width:1240px;margin:0 auto;padding:24px 20px 60px}
-  header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:4px}
-  h1{font-size:20px;margin:0;font-weight:600;letter-spacing:-.01em}
+  .wrap{max-width:1280px;margin:0 auto;padding:24px 20px 60px}
+  header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+  h1{font-size:20px;margin:0;font-weight:650;letter-spacing:0}
   .pill{font-size:11px;padding:3px 9px;border-radius:99px;border:1px solid var(--line);
         color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
-  .pill.paper{border-color:#1f6feb55;background:#1f6feb1a;color:var(--accent)}
-  .pill.live{border-color:#3fb95055;background:#3fb9501a;color:var(--up)}
-  .pill.offline{border-color:#f8514955;background:#f851491a;color:var(--down)}
-  .pill.halt{border-color:#f8514955;background:#f851491a;color:var(--down)}
+  .pill.paper{border-color:#5cc8b555;background:#5cc8b51a;color:var(--accent)}
+  .pill.live{border-color:#54c66f55;background:#54c66f1a;color:var(--up)}
+  .pill.offline,.pill.halt{border-color:#ff6b6655;background:#ff6b661a;color:var(--down)}
   .sub{color:var(--dim);font-size:12px;margin:6px 0 22px}
-  .status{border:1px solid #f8514955;background:#f851490d;color:#ffb4ae;
+  .status{border:1px solid #ff6b6655;background:#ff6b660d;color:#ffc0bd;
           padding:10px 12px;margin:10px 0 16px;border-radius:6px;font-size:12px}
   .status[hidden]{display:none}
   .grid{display:grid;gap:14px}
-  .cards{grid-template-columns:repeat(auto-fit,minmax(165px,1fr));margin-bottom:16px}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .cards{grid-template-columns:repeat(auto-fit,minmax(155px,1fr));margin-bottom:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;
+        padding:14px 16px;min-width:0}
   .card .k{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
-  .card .v{font-size:23px;font-weight:600;margin-top:5px;font-family:var(--mono);
-           letter-spacing:-.02em}
-  .card .n{font-size:11px;color:var(--dim);margin-top:3px}
-  .up{color:var(--up)} .down{color:var(--down)} .warn{color:var(--warn)}
-  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;
-         padding:16px 18px;margin-bottom:16px}
+  .card .v{font-size:22px;font-weight:650;margin-top:5px;font-family:var(--mono);
+           letter-spacing:0;overflow-wrap:anywhere}
+  .card .n{font-size:11px;color:var(--dim);margin-top:3px;overflow-wrap:anywhere}
+  .up{color:var(--up)}.down{color:var(--down)}.warn{color:var(--warn)}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;
+         padding:16px 18px;margin-bottom:16px;min-width:0}
   .panel h2{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--dim);
             margin:0 0 12px;font-weight:600}
-  table{width:100%;border-collapse:collapse;font-size:13px}
+  .table-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}
   th{text-align:left;color:var(--dim);font-weight:500;font-size:11px;
      text-transform:uppercase;letter-spacing:.05em;padding:0 10px 8px 0;
      border-bottom:1px solid var(--line)}
-  td{padding:8px 10px 8px 0;border-bottom:1px solid #21262d;font-family:var(--mono);
+  td{padding:8px 10px 8px 0;border-bottom:1px solid #262b27;font-family:var(--mono);
      font-size:12.5px}
   tr:last-child td{border-bottom:none}
-  td.txt{font-family:inherit;font-size:13px}
+  td.txt{font-family:inherit;font-size:13px;white-space:normal;min-width:150px}
   .r{text-align:right}
   .empty{color:var(--dim);font-size:13px;padding:18px 0;text-align:center}
-  .two{grid-template-columns:1fr 1fr}
-  @media(max-width:860px){.two{grid-template-columns:1fr}}
+  .two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   .dot{display:inline-block;width:7px;height:7px;border-radius:99px;margin-right:6px;
        vertical-align:middle}
-  .dot.on{background:var(--up)} .dot.off{background:var(--down)}
+  .dot.on{background:var(--up)}.dot.off{background:var(--down)}
   .bar{height:5px;background:var(--panel2);border-radius:99px;overflow:hidden;margin-top:5px}
   .bar>i{display:block;height:100%;background:var(--accent)}
   .badge{font-size:10px;padding:2px 6px;border-radius:4px;background:var(--panel2);
          color:var(--dim);text-transform:uppercase;letter-spacing:.04em}
-  .badge.buy{background:#3fb9501f;color:var(--up)}
-  .badge.sell{background:#f851491f;color:var(--down)}
+  .badge.buy{background:#54c66f1f;color:var(--up)}
+  .badge.sell{background:#ff6b661f;color:var(--down)}
   footer{color:var(--dim);font-size:11px;text-align:center;margin-top:26px}
   canvas{max-height:230px}
+  @media(max-width:860px){
+    .two{grid-template-columns:1fr}
+    .wrap{padding:18px 12px 44px}
+    .panel{padding:14px}
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <h1>Polymarket Paper Trader</h1>
-    <span class="pill paper">Paper — no real money</span>
+    <h1>Polymarket Paper Market Maker</h1>
+    <span id="strategyPill" class="pill paper">Paper HFT</span>
     <span id="statusPill" class="pill offline">Offline</span>
     <span id="haltPill"></span>
   </header>
-  <div class="sub" id="meta">Loading…</div>
+  <div class="sub" id="meta">Loading...</div>
   <div class="status" id="offlineStatus">Bot offline. Showing the last snapshot.</div>
 
   <div class="grid cards" id="cards"></div>
@@ -81,6 +86,11 @@
   <div class="panel">
     <h2>Equity curve</h2>
     <canvas id="chart"></canvas>
+  </div>
+
+  <div class="panel">
+    <h2>Working quotes</h2>
+    <div id="quotes"></div>
   </div>
 
   <div class="grid two">
@@ -100,23 +110,28 @@
       <div id="trades"></div>
     </div>
     <div class="panel">
-      <h2>Why signals were rejected</h2>
+      <h2 id="rejectionsTitle">Why quotes were skipped</h2>
       <div id="rejections"></div>
       <h2 style="margin-top:20px">Feeds</h2>
       <div id="feeds"></div>
     </div>
   </div>
 
-  <footer>
-    Simulated execution against real order books. Public heartbeats refresh about every minute.
-  </footer>
+  <footer>Paper execution against public order books. No real money is placed.</footer>
 </div>
 
 <script>
 const $ = id => document.getElementById(id);
-const money = v => (v<0?"-":"") + "$" + Math.abs(v).toFixed(2);
-const pct = v => (v>=0?"+":"") + v.toFixed(2) + "%";
+const money = v => (v < 0 ? "-" : "") + "$" + Math.abs(Number(v) || 0).toFixed(2);
+const pct = v => (v >= 0 ? "+" : "") + (Number(v) || 0).toFixed(2) + "%";
 const cls = v => v > 0 ? "up" : (v < 0 ? "down" : "");
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
+const age = ms => {
+  const value = Math.max(0, Number(ms) || 0);
+  return value < 1000 ? `${value.toFixed(0)}ms` : `${(value / 1000).toFixed(1)}s`;
+};
 const isGitHubPages = location.hostname.endsWith(".github.io");
 const pollIntervalMs = isGitHubPages ? 75000 : 5000;
 const offlineAfterMs = isGitHubPages ? 180000 : 90000;
@@ -124,133 +139,162 @@ let chart = null;
 let lastSnapshot = null;
 
 function card(k, v, note, klass){
-  return `<div class="card"><div class="k">${k}</div>
-          <div class="v ${klass||""}">${v}</div>
-          ${note?`<div class="n">${note}</div>`:""}</div>`;
+  return `<div class="card"><div class="k">${esc(k)}</div>
+    <div class="v ${klass || ""}">${esc(v)}</div>
+    ${note ? `<div class="n">${esc(note)}</div>` : ""}</div>`;
 }
 
 function table(cols, rows, empty){
-  if(!rows.length) return `<div class="empty">${empty}</div>`;
-  return `<table><thead><tr>${cols.map(c=>
-      `<th class="${c.r?"r":""}">${c.h}</th>`).join("")}</tr></thead>
-    <tbody>${rows.join("")}</tbody></table>`;
+  if(!rows.length) return `<div class="empty">${esc(empty)}</div>`;
+  return `<div class="table-wrap"><table><thead><tr>${cols.map(c =>
+    `<th class="${c.r ? "r" : ""}">${esc(c.h)}</th>`).join("")}</tr></thead>
+    <tbody>${rows.join("")}</tbody></table></div>`;
 }
 
 function render(d, online){
   const s = d.stats || {};
   const u = d.universe || {};
-  const ret = s.total_return_pct ?? 0;
+  const h = d.hft || {};
+  const isHft = d.mode === "hft";
+  const ret = Number(s.total_return_pct) || 0;
   const updated = new Date(d.generated_at);
-  const updatedText = Number.isNaN(updated.getTime())
-    ? "unknown"
-    : updated.toLocaleTimeString();
+  const updatedText = Number.isNaN(updated.getTime()) ? "unknown" : updated.toLocaleTimeString();
 
+  $("strategyPill").textContent = isHft ? "Paper HFT" : "Paper scalp";
+  $("rejectionsTitle").textContent = isHft
+    ? "Why quotes were skipped"
+    : "Why signals were rejected";
   $("meta").textContent = online
-    ? `Updated ${updatedText} · ${d.runtime_minutes ?? 0} min runtime · ` +
-      `${u.markets ?? 0} markets watched · ${u.matched_live_games ?? 0} live supported · ` +
-      `${d.signals ?? 0} signals · ${d.orders ?? 0} orders sent`
-    : `Bot offline · last update ${updatedText}`;
-
+    ? `Updated ${updatedText} | ${d.runtime_minutes ?? 0} min runtime | ` +
+      `${u.markets ?? 0} markets watched | ${u.matched_live_games ?? 0} live supported | ` +
+      `${d.signals ?? 0} cycles | ${d.orders ?? 0} orders sent`
+    : `Bot offline | last update ${updatedText}`;
   $("statusPill").className = `pill ${online ? "live" : "offline"}`;
   $("statusPill").textContent = online ? "Live" : "Offline";
   $("offlineStatus").hidden = online;
-
   $("haltPill").innerHTML = d.halted
-    ? `<span class="pill halt">Halted — ${d.halt_reason||""}</span>` : "";
+    ? `<span class="pill halt">Halted: ${esc(d.halt_reason || "")}</span>`
+    : "";
 
-  $("cards").innerHTML = [
-    card("Equity", money(s.equity ?? 0), `from ${money(s.starting_cash ?? 0)}`, cls(ret)),
+  const coreCards = [
+    card("Equity", money(s.equity), `from ${money(s.starting_cash)}`, cls(ret)),
     card("Return", pct(ret), "mark-to-mid", cls(ret)),
-    card("Liquidation value", money(d.liquidation_equity ?? 0),
-         "if you exited now", cls((d.liquidation_equity ?? 0) - (s.starting_cash ?? 0))),
-    card("Gross realized", money(s.realized_pnl ?? 0), `fees ${money(s.fees_paid ?? 0)}`,
-         cls(s.realized_pnl ?? 0)),
-    card("Cash", money(s.cash ?? 0), `exposure ${money(s.exposure ?? 0)}`),
-    card("Max drawdown", (s.max_drawdown_pct ?? 0).toFixed(2) + "%",
-         `${s.open_positions ?? 0} open · ${s.num_fills ?? 0} fills`,
-         (s.max_drawdown_pct ?? 0) > 10 ? "warn" : ""),
-  ].join("");
+    card("Liquidation value", money(d.liquidation_equity), "if exited now",
+      cls((Number(d.liquidation_equity) || 0) - (Number(s.starting_cash) || 0))),
+    card("Gross realized", money(s.realized_pnl), `fees ${money(s.fees_paid)}`,
+      cls(Number(s.realized_pnl) || 0)),
+    card("Cash", money(s.cash), `exposure ${money(s.exposure)}`),
+    card("Max drawdown", `${(Number(s.max_drawdown_pct) || 0).toFixed(2)}%`,
+      `${s.open_positions ?? 0} open | ${s.num_fills ?? 0} fills`,
+      (Number(s.max_drawdown_pct) || 0) > 10 ? "warn" : ""),
+  ];
+  const hftCards = isHft ? [
+    card("Active quotes", h.active_quotes ?? 0,
+      `${h.score_cancels ?? 0} cancelled on score changes`),
+    card("Quote cycles/min", (Number(h.quote_cycles_per_min) || 0).toFixed(1),
+      `${h.quote_cycles ?? 0} total cycles`),
+    card("Quote actions", (h.quotes_sent ?? 0) + (h.quotes_cancelled ?? 0),
+      `${h.quotes_sent ?? 0} sent | ${h.quotes_cancelled ?? 0} cancelled`),
+    card("Maker fill rate", `${(Number(h.maker_fill_pct) || 0).toFixed(1)}%`,
+      `${h.maker_fills ?? 0} maker | ${h.taker_fills ?? 0} taker`),
+  ] : [];
+  $("cards").innerHTML = coreCards.concat(hftCards).join("");
 
-  // Equity chart
   const ec = d.equity_curve || [];
   const labels = ec.map(p => new Date(p.t).toLocaleTimeString());
   const data = ec.map(p => p.equity);
-  if(chart){ chart.data.labels = labels;
-             chart.data.datasets[0].data = data; chart.update("none"); }
-  else if(ec.length){
+  if(chart){
+    chart.data.labels = labels;
+    chart.data.datasets[0].data = data;
+    chart.update("none");
+  }else if(ec.length && window.Chart){
     chart = new Chart($("chart"), {
       type:"line",
-      data:{labels, datasets:[{
-        data, borderColor:"#58a6ff", backgroundColor:"#58a6ff1a",
-        borderWidth:2, pointRadius:0, fill:true, tension:.25 }]},
-      options:{responsive:true, animation:false,
-        plugins:{legend:{display:false}},
+      data:{labels,datasets:[{
+        data,borderColor:"#5cc8b5",backgroundColor:"#5cc8b51a",
+        borderWidth:2,pointRadius:0,fill:true,tension:.25
+      }]},
+      options:{responsive:true,animation:false,plugins:{legend:{display:false}},
         scales:{
-          x:{grid:{color:"#21262d"},ticks:{color:"#8b949e",maxTicksLimit:8,font:{size:10}}},
-          y:{grid:{color:"#21262d"},ticks:{color:"#8b949e",font:{size:10},
-             callback:v=>"$"+v.toFixed(0)}}}}
+          x:{grid:{color:"#262b27"},ticks:{color:"#99a39c",maxTicksLimit:8,font:{size:10}}},
+          y:{grid:{color:"#262b27"},ticks:{color:"#99a39c",font:{size:10},
+            callback:v=>"$"+v.toFixed(0)}}
+        }}
     });
   }
 
-  // Tracked matches
+  $("quotes").innerHTML = table(
+    [{h:"State"},{h:"Side"},{h:"Outcome"},{h:"Price",r:1},
+     {h:"Size",r:1},{h:"Ahead",r:1},{h:"Age",r:1}],
+    (d.open_orders || []).map(q => `<tr title="${esc(q.market)}">
+      <td><span class="badge">${esc(q.state)}</span></td>
+      <td><span class="badge ${String(q.side).toLowerCase()}">${esc(q.side)}</span></td>
+      <td class="txt">${esc(q.label)}</td>
+      <td class="r">${(Number(q.price) || 0).toFixed(3)}</td>
+      <td class="r">${q.remaining}</td>
+      <td class="r">${q.queue_ahead}</td>
+      <td class="r">${age(q.age_ms)}</td></tr>`),
+    isHft ? "No working quotes right now." : "Working quotes appear in HFT mode.");
+
   $("tracked").innerHTML = table(
     [{h:"Match"},{h:"Score"},{h:"Model",r:1},{h:"Market",r:1}],
-    (d.tracked||[]).map(t=>{
-      const gap = (t.model!=null && t.market_price!=null) ? t.model - t.market_price : null;
+    (d.tracked || []).map(t => {
+      const gap = t.model != null && t.market_price != null
+        ? t.model - t.market_price
+        : null;
       return `<tr>
-        <td class="txt">${t.outcomes?.join(" v ") ?? ""}
-          ${t.tradeable?"":`<span class="badge">${t.trade_status||"paused"}</span>`}</td>
-        <td>${t.score||"—"}</td>
-        <td class="r">${t.model!=null?(t.model*100).toFixed(1)+"%":"—"}</td>
-        <td class="r ${gap!=null?cls(gap):""}">
-          ${t.market_price!=null?(t.market_price*100).toFixed(1)+"%":"—"}</td>
-      </tr>`;}),
+        <td class="txt">${esc(t.outcomes?.join(" v ") ?? "")}
+          ${t.tradeable ? "" : `<span class="badge">${esc(t.trade_status || "paused")}</span>`}</td>
+        <td>${esc(t.score || "-")}</td>
+        <td class="r">${t.model != null ? (t.model * 100).toFixed(1) + "%" : "-"}</td>
+        <td class="r ${gap != null ? cls(gap) : ""}">
+          ${t.market_price != null ? (t.market_price * 100).toFixed(1) + "%" : "-"}</td>
+      </tr>`;
+    }),
     u.markets
-      ? `${u.markets} winner markets watched; ${u.matched_live_games ?? 0} supported matches are live now.`
+      ? `${u.markets} winner markets watched; ${u.matched_live_games ?? 0} supported matches are live.`
       : "No winner markets discovered.");
 
-  // Positions
   $("positions").innerHTML = table(
     [{h:"Outcome"},{h:"Shares",r:1},{h:"Cost",r:1},{h:"Mark",r:1},{h:"P&L",r:1}],
-    (d.positions||[]).map(p=>`<tr>
-      <td class="txt">${p.label}</td>
+    (d.positions || []).map(p => `<tr>
+      <td class="txt">${esc(p.label)}</td>
       <td class="r">${p.shares}</td>
-      <td class="r">${p.avg_cost.toFixed(3)}</td>
-      <td class="r">${p.mark.toFixed(3)}</td>
+      <td class="r">${(Number(p.avg_cost) || 0).toFixed(3)}</td>
+      <td class="r">${(Number(p.mark) || 0).toFixed(3)}</td>
       <td class="r ${cls(p.unrealized)}">${money(p.unrealized)}</td></tr>`),
     "No open positions.");
 
-  // Trades
   $("trades").innerHTML = table(
-    [{h:"Time"},{h:"Side"},{h:"Outcome"},{h:"Price",r:1},{h:"Size",r:1}],
-    (d.trades||[]).slice(-15).map(t=>`<tr>
-      <td>${t.time}</td>
-      <td><span class="badge ${t.side.toLowerCase()}">${t.side}</span></td>
-      <td class="txt">${t.label}</td>
-      <td class="r">${t.price.toFixed(3)}</td>
+    [{h:"Time"},{h:"Side"},{h:"Outcome"},{h:"Liquidity"},
+     {h:"Price",r:1},{h:"Size",r:1}],
+    (d.trades || []).slice(-15).map(t => `<tr>
+      <td>${esc(t.time)}</td>
+      <td><span class="badge ${String(t.side).toLowerCase()}">${esc(t.side)}</span></td>
+      <td class="txt">${esc(t.label)}</td>
+      <td><span class="badge">${esc(t.liquidity)}</span></td>
+      <td class="r">${(Number(t.price) || 0).toFixed(3)}</td>
       <td class="r">${t.size}</td></tr>`),
     "No fills yet.");
 
-  // Rejections
-  const rej = Object.entries(d.rejections||{});
-  const max = Math.max(1, ...rej.map(r=>r[1]));
-  $("rejections").innerHTML = rej.length ? rej.map(([k,v])=>`
-      <div style="margin-bottom:9px">
-        <div style="display:flex;justify-content:space-between;font-size:12px">
-          <span style="color:var(--dim)">${k}</span><span>${v}</span></div>
-        <div class="bar"><i style="width:${100*v/max}%"></i></div>
-      </div>`).join("")
-    : `<div class="empty">Nothing rejected yet.</div>`;
+  const rej = Object.entries(d.rejections || {});
+  const max = Math.max(1, ...rej.map(r => r[1]));
+  $("rejections").innerHTML = rej.length ? rej.map(([k,v]) => `
+    <div style="margin-bottom:9px">
+      <div style="display:flex;justify-content:space-between;font-size:12px">
+        <span style="color:var(--dim)">${esc(k)}</span><span>${v}</span>
+      </div>
+      <div class="bar"><i style="width:${100 * v / max}%"></i></div>
+    </div>`).join("") : `<div class="empty">Nothing skipped yet.</div>`;
 
-  // Feeds
-  const f = d.feeds||{};
-  $("feeds").innerHTML = ["market","sports"].map(n=>{
-    const x = f[n]||{};
+  const f = d.feeds || {};
+  $("feeds").innerHTML = ["market","sports"].map(n => {
+    const x = f[n] || {};
     const connected = online && x.connected;
     return `<div style="font-size:12px;margin-bottom:5px">
-      <span class="dot ${connected?"on":"off"}"></span>${n} feed
-      <span style="color:var(--dim)"> · ${connected?"connected":"disconnected"}
-      · ${x.reconnects||0} reconnects</span></div>`;
+      <span class="dot ${connected ? "on" : "off"}"></span>${n} feed
+      <span style="color:var(--dim)"> | ${connected ? "connected" : "disconnected"}
+      | ${x.reconnects || 0} reconnects</span></div>`;
   }).join("");
 }
 
@@ -263,42 +307,42 @@ function liveDataUrl(){
 }
 
 async function getJson(url){
-  const headers = isGitHubPages
-    ? {"Accept":"application/vnd.github.raw+json"}
-    : {};
-  const r = await fetch(url, {cache:"no-store", headers});
-  if(!r.ok) throw new Error(r.status);
-  return r.json();
+  const headers = isGitHubPages ? {"Accept":"application/vnd.github.raw+json"} : {};
+  const response = await fetch(url,{cache:"no-store",headers});
+  if(!response.ok) throw new Error(response.status);
+  return response.json();
 }
 
 function isOnline(d){
-  const age = Date.now() - new Date(d.generated_at).getTime();
-  return d.online === true && d.mode === "paper" &&
-    Number.isFinite(age) && age >= 0 && age <= offlineAfterMs;
+  const snapshotAge = Date.now() - new Date(d.generated_at).getTime();
+  return d.online === true && ["paper","scalp","hft"].includes(d.mode) &&
+    Number.isFinite(snapshotAge) && snapshotAge >= 0 && snapshotAge <= offlineAfterMs;
 }
 
 async function tick(){
   try{
     const d = await getJson(liveDataUrl());
     lastSnapshot = d;
-    render(d, isOnline(d));
-  }catch(e){
+    render(d,isOnline(d));
+  }catch(error){
     if(!lastSnapshot && isGitHubPages){
       try{
         lastSnapshot = await getJson("data.json?t=" + Date.now());
       }catch(ignore){}
     }
-    if(lastSnapshot) render(lastSnapshot, isOnline(lastSnapshot));
-    else{
+    if(lastSnapshot){
+      render(lastSnapshot,isOnline(lastSnapshot));
+    }else{
       $("statusPill").className = "pill offline";
       $("statusPill").textContent = "Offline";
       $("offlineStatus").hidden = false;
-      $("meta").textContent = "Bot offline · no dashboard data available";
+      $("meta").textContent = "Bot offline | no dashboard data available";
     }
   }
 }
+
 tick();
-setInterval(tick, pollIntervalMs);
+setInterval(tick,pollIntervalMs);
 </script>
 </body>
 </html>

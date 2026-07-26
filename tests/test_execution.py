@@ -195,6 +195,19 @@ class TestPaperBroker(unittest.TestCase):
         self.b.on_book(book(ts=1300), ts_ms=1300)
         self.assertEqual(self.b.on_trade(TOK, 0.50, 1000, 1400), [])
 
+    def test_passive_quote_can_be_adversely_selected(self):
+        self.b.on_book(book(0.49, 0.51, ts=1000), ts_ms=1000)
+        o = Order(TOK, Side.BUY, 10, 0.49, OrderType.PASSIVE)
+        self.b.submit(o, ts_ms=1000)
+        self.b.on_book(book(0.49, 0.51, ts=1300), ts_ms=1300)
+
+        fills = self.b.on_book(book(0.43, 0.45, ts=1400), ts_ms=1400)
+
+        self.assertEqual(len(fills), 1)
+        self.assertEqual(fills[0].liquidity, "maker")
+        self.assertAlmostEqual(fills[0].price, 0.49)
+        self.assertLess(0.44 - fills[0].price, 0.0)
+
     def test_missed_orders_are_possible(self):
         b = PaperBroker(BrokerConfig(latency_ms=0, latency_jitter_ms=0,
                                      miss_probability=1.0, seed=3))

@@ -136,6 +136,8 @@ def cmd_live(args: argparse.Namespace) -> int:
         cfg.run.max_runtime_s = int(args.minutes * 60)
     if args.sport:
         cfg.run.sports = [args.sport]
+    if args.mode:
+        cfg.run.mode = args.mode
     if args.publish_github is not None:
         cfg.run.github_live_enabled = args.publish_github
     setup_logging(args.log_level or cfg.run.log_level, log_dir=cfg.run.state_dir)
@@ -217,6 +219,7 @@ def build_parser() -> argparse.ArgumentParser:
     lv.add_argument("--cash", type=float, default=None)
     lv.add_argument("--minutes", type=float, default=None, help="stop after N minutes")
     lv.add_argument("--sport", default=None, choices=["tennis", "table_tennis"])
+    lv.add_argument("--mode", default=None, choices=["scalp", "hft"])
     lv.add_argument(
         "--publish-github",
         action=argparse.BooleanOptionalAction,
