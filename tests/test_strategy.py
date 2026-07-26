@@ -69,6 +69,22 @@ class TestAnchoring(unittest.TestCase):
         self.s.on_score(self.m, "3-2", "1", live=True, ended=False, ts=1000)
         self.assertIsNone(self.s.evaluate(self.m, books(0.5), ts=1000))
 
+    def test_live_anchor_round_trips_current_score_and_price(self):
+        self.assertTrue(
+            self.s.set_live_anchor(
+                self.m,
+                0.42,
+                "6-3, 3-5",
+                "S2",
+                ts=1_000,
+            )
+        )
+        tracker = self.s.trackers[self.m.market_id]
+        self.assertTrue(tracker.anchored_cleanly)
+        self.assertTrue(tracker.late_joined)
+        self.assertAlmostEqual(tracker.fair_value, 0.42, places=3)
+        self.assertIsNone(self.s.evaluate(self.m, books(0.50, ts=1_000), ts=1_000))
+
 
 class TestRepricing(unittest.TestCase):
     def setUp(self):
@@ -348,7 +364,7 @@ class TestLiveAnchorGuard(unittest.IsolatedAsyncioTestCase):
     async def test_first_late_score_invalidates_pregame_anchor(self):
         engine = TradingEngine(AppConfig())
         item = market()
-        engine.gamma.markets[item.market_id] = item
+        engine.gamma.activate([item])
         engine.strategy.set_anchor(item, 0.55, ts=1_000)
 
         await engine._on_game({
@@ -359,6 +375,29 @@ class TestLiveAnchorGuard(unittest.IsolatedAsyncioTestCase):
         })
 
         self.assertFalse(engine.strategy.trackers[item.market_id].anchored_cleanly)
+
+    async def test_first_late_score_is_calibrated_from_current_price(self):
+        engine = TradingEngine(AppConfig())
+        item = market()
+        engine.gamma.activate([item])
+        engine.strategy.set_anchor(item, 0.55, ts=1_000)
+
+        await engine._on_game({
+            "gameId": item.game_id,
+            "score": "6-3, 3-5",
+            "period": "S2",
+            "live": True,
+        })
+
+        # A Gamma event price is not fresh enough for a live calibration.
+        self.assertFalse(engine.strategy.trackers[item.market_id].anchored_cleanly)
+
+        await engine._on_book(books(0.42)[T0])
+
+        tracker = engine.strategy.trackers[item.market_id]
+        self.assertTrue(tracker.anchored_cleanly)
+        self.assertTrue(tracker.late_joined)
+        self.assertAlmostEqual(tracker.fair_value, 0.42, places=3)
 
 
 class TestEndToEnd(unittest.TestCase):

@@ -102,6 +102,8 @@ class TradingEngine:
         ]
         if cfg.max_runtime_s:
             self._tasks.append(asyncio.create_task(self._deadline(cfg.max_runtime_s)))
+        for task in self._tasks:
+            task.add_done_callback(self._task_finished)
 
         # Announce the session immediately; the normal mark loop refreshes it.
         self._publish()
@@ -118,6 +120,16 @@ class TradingEngine:
 
     def stop(self) -> None:
         self._stop.set()
+
+    def _task_finished(self, task: asyncio.Task) -> None:
+        if task.cancelled() or self._stop.is_set():
+            return
+        try:
+            exc = task.exception()
+        except asyncio.CancelledError:
+            return
+        if exc is not None:
+            log.error("background task %s stopped unexpectedly: %r", task.get_name(), exc)
 
     async def shutdown(self) -> None:
         log.info("shutting down")
@@ -255,6 +267,7 @@ class TradingEngine:
         market = self.gamma.by_token.get(book.token_id)
         if market is None:
             return
+        self._try_late_anchor_from_book(market)
         await self._evaluate(market)
 
     async def _on_trade(self, token_id: str, price: float, size: float, ts: int) -> None:
@@ -286,14 +299,44 @@ class TradingEngine:
                 and self._games_played({"score": score})
                 > self.cfg.strategy.max_games_at_anchor
             ):
-                # If the first live score is already underway, the market price
-                # was not a clean pregame anchor. Keep observing, but never bet.
-                tracker.anchored_cleanly = False
+                # Infer strength from the current winner price *at this score*.
+                # Treating an in-play price as a pregame price double-counts the
+                # score and creates fictional edge.
+                book = self.broker.book(m.token_ids[0])
+                price = book.mid if book and book.mid is not None else None
+                if price is None or not self.strategy.set_live_anchor(
+                    m,
+                    price,
+                    score,
+                    period,
+                ):
+                    tracker.anchored_cleanly = False
             self.strategy.on_score(m, score, period, live, ended)
             if ended:
                 await self._flatten(m, "match ended")
             else:
                 await self._evaluate(m)
+
+    def _try_late_anchor_from_book(self, market: TradableMarket) -> bool:
+        tracker = self.strategy.trackers.get(market.market_id)
+        if (
+            tracker is None
+            or not tracker.live
+            or tracker.ended
+            or tracker.anchored_cleanly
+            or self._games_played({"score": tracker.last_score})
+            <= self.cfg.strategy.max_games_at_anchor
+        ):
+            return False
+        book = self.broker.book(market.token_ids[0])
+        if book is None or book.mid is None:
+            return False
+        return self.strategy.set_live_anchor(
+            market,
+            book.mid,
+            tracker.last_score,
+            tracker.last_period,
+        )
 
     def _book_fill(self, fill: Fill) -> None:
         market = self.gamma.by_token.get(fill.token_id)
@@ -460,26 +503,33 @@ class TradingEngine:
             if self._stop.is_set():
                 break
 
-            marks = self._marks()
-            self.portfolio.mark(marks)
-            day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-            if self.risk.check_halt(self.portfolio, marks, day):
-                self.broker.cancel_all(side=Side.BUY)
+            try:
+                marks = self._marks()
+                self.portfolio.mark(marks)
+                day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+                if self.risk.check_halt(self.portfolio, marks, day):
+                    self.broker.cancel_all(side=Side.BUY)
 
-            # The dashboard snapshot is cheap, so refresh it every mark rather
-            # than only on the slower status cadence.
-            self._publish()
+                # The dashboard snapshot is cheap, so refresh it every mark rather
+                # than only on the slower status cadence.
+                self._publish()
 
-            now = now_ms()
-            if now - last_status > cfg.status_interval_s * 1000:
-                last_status = now
-                self._status(marks)
-                self._save()
+                now = now_ms()
+                if now - last_status > cfg.status_interval_s * 1000:
+                    last_status = now
+                    self._status(marks)
+                    self._save()
 
-            # A dead feed looks exactly like a quiet market. Say so explicitly.
-            for f in (self.market_feed, self.sports_feed):
-                if f and f.last_message_ms and f.stale_ms > 120_000:
-                    log.warning("%s has been silent for %.0fs", f.name, f.stale_ms / 1000)
+                # A dead feed looks exactly like a quiet market. Say so explicitly.
+                for f in (self.market_feed, self.sports_feed):
+                    if f and f.last_message_ms and f.stale_ms > 120_000:
+                        log.warning(
+                            "%s has been silent for %.0fs",
+                            f.name,
+                            f.stale_ms / 1000,
+                        )
+            except Exception:  # noqa: BLE001 - this loop must remain alive
+                log.exception("housekeeping cycle failed; retrying on the next mark")
 
     def _status(self, marks: dict[str, float]) -> None:
         s = self.portfolio.stats(marks)

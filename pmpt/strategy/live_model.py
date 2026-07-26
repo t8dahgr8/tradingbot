@@ -86,6 +86,7 @@ class MatchTracker:
     live: bool = False
     ended: bool = False
     anchored_cleanly: bool = False
+    late_joined: bool = False
     updates: int = 0
 
     def score_age_ms(self, ts: int | None = None) -> int:
@@ -141,6 +142,71 @@ class LiveModelStrategy:
         )
         return True
 
+    def set_live_anchor(
+        self,
+        market: TradableMarket,
+        implied_prob: float,
+        score: str,
+        period: str,
+        ts: int | None = None,
+    ) -> bool:
+        """Calibrate strength at the current score when joining a match late."""
+        cfg = self.cfg
+        t = self.tracker(market)
+        if not (cfg.anchor_min_price <= implied_prob <= cfg.anchor_max_price):
+            t.anchored_cleanly = False
+            return False
+
+        if market.sport == "table_tennis":
+            state = tt.parse_table_tennis_score(
+                score,
+                period,
+                best_of=market.best_of or 5,
+            )
+            pa, pb = tt.calibrate_serve_probs_at_state(implied_prob, state)
+            fair_value = tt.match_win_prob(state, pa, pb)
+        else:
+            state = tn.parse_tennis_score(
+                score,
+                period,
+                best_of=market.best_of or 3,
+            )
+            pa, pb = tn.calibrate_serve_probs_at_state(
+                implied_prob,
+                state,
+                surface=cfg.surface,  # type: ignore[arg-type]
+            )
+            fair_value = tn.match_win_prob(state, pa, pb)
+
+        if state.finished or abs(fair_value - implied_prob) > 0.015:
+            t.anchored_cleanly = False
+            return False
+
+        timestamp = ts or now_ms()
+        t.anchor_prob = implied_prob
+        t.anchor_ms = timestamp
+        t.pa, t.pb = pa, pb
+        t.last_score = score
+        t.last_period = period
+        # Joining is calibration, not a tradable score event. Arm signals only
+        # after the next score update arrives from the sports feed.
+        t.last_score_change_ms = 0
+        t.fair_value = fair_value
+        t.live = True
+        t.ended = False
+        t.anchored_cleanly = True
+        t.late_joined = True
+        t.updates = max(1, t.updates)
+        log.info(
+            "live-anchored %s at score %s / price %.3f -> serve probs (%.4f, %.4f)",
+            market.slug or market.market_id,
+            score,
+            implied_prob,
+            pa,
+            pb,
+        )
+        return True
+
     def decay_anchor(self, market: TradableMarket, market_prob: float,
                      ts: int | None = None) -> None:
         """Pull the anchor toward the market. Prevents fighting real news forever."""
@@ -154,20 +220,52 @@ class LiveModelStrategy:
         if dt <= 0:
             return
         w = 1.0 - math.pow(0.5, dt / hl)
+        source_prob = (
+            t.fair_value
+            if t.late_joined and t.fair_value is not None
+            else t.anchor_prob
+        )
         # Re-derive serve probabilities against the blended anchor. Skipping
         # negligible moves matters: recalibration is the most expensive thing
         # this strategy does, and a 0.2% anchor shift changes nothing we act on.
-        blended = (1 - w) * t.anchor_prob + w * market_prob
-        if abs(blended - t.anchor_prob) < 2e-3:
+        blended = (1 - w) * source_prob + w * market_prob
+        if abs(blended - source_prob) < 2e-3:
             return
         t.anchor_prob = blended
         t.anchor_ms = ts or now_ms()
         if market.sport == "table_tennis":
-            t.pa, t.pb = tt.calibrate_serve_probs(blended, best_of=market.best_of or 5)
+            if t.late_joined:
+                state = tt.parse_table_tennis_score(
+                    t.last_score,
+                    t.last_period,
+                    best_of=market.best_of or 5,
+                )
+                t.pa, t.pb = tt.calibrate_serve_probs_at_state(blended, state)
+                t.fair_value = tt.match_win_prob(state, t.pa, t.pb)
+            else:
+                t.pa, t.pb = tt.calibrate_serve_probs(
+                    blended,
+                    best_of=market.best_of or 5,
+                )
         else:
-            t.pa, t.pb = tn.calibrate_serve_probs(
-                blended, best_of=market.best_of or 3, surface=self.cfg.surface  # type: ignore[arg-type]
-            )
+            if t.late_joined:
+                state = tn.parse_tennis_score(
+                    t.last_score,
+                    t.last_period,
+                    best_of=market.best_of or 3,
+                )
+                t.pa, t.pb = tn.calibrate_serve_probs_at_state(
+                    blended,
+                    state,
+                    surface=self.cfg.surface,  # type: ignore[arg-type]
+                )
+                t.fair_value = tn.match_win_prob(state, t.pa, t.pb)
+            else:
+                t.pa, t.pb = tn.calibrate_serve_probs(
+                    blended,
+                    best_of=market.best_of or 3,
+                    surface=self.cfg.surface,  # type: ignore[arg-type]
+                )
 
     def on_score(self, market: TradableMarket, score: str, period: str,
                  live: bool, ended: bool, ts: int | None = None) -> float | None:

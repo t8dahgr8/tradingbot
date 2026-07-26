@@ -39,14 +39,15 @@ Concretely:
 The aggressive profile watches up to 120 tennis and table-tennis match-winner
 markets, permits 12 simultaneous paper positions, and looks for many short
 scalps instead of one large payout. It still will not manufacture action: every
-entry must clear slippage, the market's live fee schedule, and a 1.2% remaining
+entry must clear slippage, the market's live fee schedule, and a 0.8% remaining
 model edge.
 
 Pregame prices are refreshed after a material 1c move. That lets the anchor
 absorb public information such as withdrawals and injury news without pretending
 that a scraped headline is a reliable trading signal. Orders are generated only
-from a fresh live score, and a match first seen after play has progressed is
-marked untradeable.
+from a fresh live score. When a delayed or resumed match is first discovered
+after play has progressed, player strength is solved against both its current
+score and current winner price so the score is not counted twice.
 
 ---
 
@@ -77,7 +78,7 @@ python run.py dashboard      # http://127.0.0.1:8000
 | `python run.py dashboard` | Web UI on `http://127.0.0.1:8000`. |
 | `python run.py markets` | List currently tradeable winner markets. |
 | `python run.py report` | Print the saved portfolio. |
-| `python -m unittest discover -s tests` | Run the test suite (137 tests). |
+| `python -m unittest discover -s tests` | Run the test suite (142 tests). |
 
 ---
 
@@ -166,7 +167,7 @@ pmpt/
     risk.py                 Kelly sizing, exposure caps, kill switches
 docs/
   index.html                dashboard (also the GitHub Pages site)
-tests/                      137 unit tests, stdlib unittest only
+tests/                      142 unit tests, stdlib unittest only
 ```
 
 ### The models
@@ -205,9 +206,10 @@ in a market you misread. Every trade must survive all of:
 **Sizing** — fractional Kelly (0.15×), capped at 5% of equity per trade, 6% per
 market, 40% total exposure, and 12 simultaneous positions.
 
-**Entry filters** — minimum 1.2% edge *after* assumed slippage and both expected
-taker fees; spread under 4c; at least 20 shares of depth; book fresher than 5s;
-price between 0.05 and 0.95; signal younger than 12s.
+**Entry filters** — minimum 0.8% edge *after* assumed slippage and both expected
+taker fees; confidence of at least 0.45; spread under 4c; at least 20 shares of
+depth; book fresher than 5s; price between 0.05 and 0.95; signal younger than
+12s.
 
 **Exits** — bank 0.4c net profit per share quickly, take a 0.1c net scratch
 profit after 10 seconds, bail when the model edge disappears, cap holds at 90
@@ -216,8 +218,8 @@ seconds, and cut losses at 5c.
 **Kill switches** — 15% max drawdown, 10% daily loss limit, $20 equity floor.
 Once tripped, trading stops permanently for the session.
 
-It also **refuses to trade a match it didn't see from the start**, because
-without a clean pre-match anchor the calibration is guesswork.
+It refuses to trade until it has either a clean pre-match anchor or a live anchor
+that round-trips the current score and winner price.
 
 ---
 

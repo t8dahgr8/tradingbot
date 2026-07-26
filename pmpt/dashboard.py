@@ -14,10 +14,13 @@ code. Stdlib only.
 
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 import os
 import shutil
+import tempfile
+import time
 from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
@@ -88,6 +91,20 @@ def build_snapshot(engine) -> dict:
         for p in pf.equity_curve[-600:]
     ]
 
+    markets_by_sport: dict[str, int] = {}
+    market_game_ids: set[int] = set()
+    for market in engine.gamma.markets.values():
+        markets_by_sport[market.sport] = markets_by_sport.get(market.sport, 0) + 1
+        if market.game_id is not None:
+            market_game_ids.add(int(market.game_id))
+
+    score_games = engine.sports_feed.games if engine.sports_feed else {}
+    live_score_ids = {
+        int(game_id)
+        for game_id, game in score_games.items()
+        if bool(game.get("live")) and not bool(game.get("ended"))
+    }
+
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "online": True,
@@ -112,6 +129,13 @@ def build_snapshot(engine) -> dict:
                 "stale_ms": engine.sports_feed.stale_ms if engine.sports_feed else None,
             },
         },
+        "universe": {
+            "markets": len(engine.gamma.markets),
+            "by_sport": markets_by_sport,
+            "score_games_seen": len(score_games),
+            "live_score_games": len(live_score_ids),
+            "matched_live_games": len(market_game_ids & live_score_ids),
+        },
         "positions": positions,
         "trades": trades,
         "tracked": tracked,
@@ -133,15 +157,15 @@ def write_snapshot(engine, state_dir: str, publish_dir: str | None = DOCS_DIR) -
         log.warning("dashboard snapshot failed: %s", e)
         return
 
-    os.makedirs(state_dir, exist_ok=True)
-    path = os.path.join(state_dir, SNAPSHOT_NAME)
-    tmp = path + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as fh:
-        json.dump(snap, fh, indent=2)
-    os.replace(tmp, path)  # atomic, so the server never reads a half-written file
-
-    if publish_dir and os.path.isdir(publish_dir):
-        _write_json_atomic(os.path.join(publish_dir, SNAPSHOT_NAME), snap)
+    try:
+        os.makedirs(state_dir, exist_ok=True)
+        _write_json_atomic(os.path.join(state_dir, SNAPSHOT_NAME), snap)
+        if publish_dir and os.path.isdir(publish_dir):
+            _write_json_atomic(os.path.join(publish_dir, SNAPSHOT_NAME), snap)
+    except OSError as exc:
+        # On Windows a reader can briefly block os.replace. Missing one
+        # heartbeat is preferable to killing the trading housekeeping task.
+        log.warning("dashboard snapshot write failed; will retry next mark: %s", exc)
 
 
 def mark_snapshot_offline(
@@ -167,10 +191,26 @@ def mark_snapshot_offline(
 
 
 def _write_json_atomic(path: str, payload: dict) -> None:
-    tmp = path + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as fh:
-        json.dump(payload, fh, indent=2)
-    os.replace(tmp, path)
+    directory = os.path.dirname(os.path.abspath(path))
+    fd, tmp = tempfile.mkstemp(
+        prefix=f".{os.path.basename(path)}.",
+        suffix=".tmp",
+        dir=directory,
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            json.dump(payload, fh, indent=2)
+        for attempt in range(6):
+            try:
+                os.replace(tmp, path)
+                return
+            except PermissionError:
+                if attempt == 5:
+                    raise
+                time.sleep(0.02 * (attempt + 1))
+    finally:
+        with contextlib.suppress(OSError):
+            os.remove(tmp)
 
 
 def snapshot_from_simulation(result, portfolio) -> dict:
