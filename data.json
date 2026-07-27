@@ -1,0 +1,4996 @@
+{
+  "generated_at": "2026-07-27T11:23:32.896788+00:00",
+  "online": false,
+  "mode": "hft",
+  "execution": "paper",
+  "stats": {
+    "starting_cash": 123.45,
+    "cash": 114.8959,
+    "equity": 114.8959,
+    "total_return_pct": -6.929,
+    "realized_pnl": -6.7301,
+    "unrealized_pnl": 0,
+    "fees_paid": 1.824,
+    "num_fills": 92,
+    "open_positions": 0,
+    "exposure": 0,
+    "max_drawdown_pct": 6.929,
+    "winning_positions": 0,
+    "losing_positions": 0
+  },
+  "liquidation_equity": 114.9,
+  "runtime_minutes": 1786.1,
+  "signals": 5199963,
+  "orders": 2452,
+  "halted": false,
+  "halt_reason": "",
+  "feeds": {
+    "market": {
+      "connected": false,
+      "reconnects": 36,
+      "stale_ms": 5030
+    },
+    "sports": {
+      "connected": false,
+      "reconnects": 0,
+      "stale_ms": 70255130
+    }
+  },
+  "universe": {
+    "markets": 298,
+    "by_sport": {
+      "baseball": 26,
+      "soccer": 54,
+      "table_tennis": 180,
+      "tennis": 38
+    },
+    "score_games_seen": 76,
+    "live_score_games": 22,
+    "matched_live_games": 0
+  },
+  "positions": [],
+  "open_orders": [],
+  "hft": {
+    "quote_cycles": 5199963,
+    "quotes_sent": 2408,
+    "quotes_cancelled": 2216,
+    "score_cancels": 11,
+    "maker_fills": 51,
+    "taker_fills": 41,
+    "maker_fill_pct": 55.4,
+    "active_quotes": 0,
+    "quote_cycles_per_min": 2911.4
+  },
+  "trades": [
+    {
+      "time": "05:45:01",
+      "side": "BUY",
+      "label": "4005254838",
+      "price": 0.15,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "05:46:31",
+      "side": "SELL",
+      "label": "4005254838",
+      "price": 0.13,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0283
+    },
+    {
+      "time": "06:19:13",
+      "side": "BUY",
+      "label": "4931379709",
+      "price": 0.88,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "06:20:42",
+      "side": "SELL",
+      "label": "4931379709",
+      "price": 0.87,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0283
+    },
+    {
+      "time": "06:54:05",
+      "side": "BUY",
+      "label": "4931379709",
+      "price": 0.69,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "06:55:13",
+      "side": "SELL",
+      "label": "4931379709",
+      "price": 0.6194,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0589
+    },
+    {
+      "time": "07:10:30",
+      "side": "BUY",
+      "label": "4931379709",
+      "price": 0.37,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "07:10:32",
+      "side": "SELL",
+      "label": "4931379709",
+      "price": 0.32,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0544
+    },
+    {
+      "time": "07:10:54",
+      "side": "BUY",
+      "label": "4931379709",
+      "price": 0.31,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "07:12:24",
+      "side": "SELL",
+      "label": "4931379709",
+      "price": 0.27,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0493
+    },
+    {
+      "time": "07:39:47",
+      "side": "BUY",
+      "label": "4931379709",
+      "price": 0.53,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "07:39:47",
+      "side": "SELL",
+      "label": "4931379709",
+      "price": 0.487,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0625
+    },
+    {
+      "time": "08:29:51",
+      "side": "BUY",
+      "label": "8630028757",
+      "price": 0.41,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "08:30:55",
+      "side": "SELL",
+      "label": "8630028757",
+      "price": 0.36,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0576
+    },
+    {
+      "time": "08:51:00",
+      "side": "BUY",
+      "label": "1577237459",
+      "price": 0.73,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "08:52:31",
+      "side": "SELL",
+      "label": "1577237459",
+      "price": 0.68,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0544
+    },
+    {
+      "time": "09:10:11",
+      "side": "BUY",
+      "label": "1577237459",
+      "price": 0.68,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "09:10:49",
+      "side": "SELL",
+      "label": "1577237459",
+      "price": 0.63,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0583
+    },
+    {
+      "time": "10:09:52",
+      "side": "BUY",
+      "label": "1577237459",
+      "price": 0.4,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "10:10:06",
+      "side": "SELL",
+      "label": "1577237459",
+      "price": 0.35,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0569
+    },
+    {
+      "time": "10:17:48",
+      "side": "BUY",
+      "label": "8630028757",
+      "price": 0.15,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "10:19:09",
+      "side": "SELL",
+      "label": "8630028757",
+      "price": 0.09,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0205
+    },
+    {
+      "time": "10:22:14",
+      "side": "BUY",
+      "label": "1577237459",
+      "price": 0.92,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "10:22:42",
+      "side": "SELL",
+      "label": "1577237459",
+      "price": 0.867,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0288
+    },
+    {
+      "time": "10:22:43",
+      "side": "BUY",
+      "label": "1577237459",
+      "price": 0.87,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "10:23:22",
+      "side": "SELL",
+      "label": "1577237459",
+      "price": 0.88,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "12:09:56",
+      "side": "BUY",
+      "label": "8005234847",
+      "price": 0.49,
+      "size": 2.77,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "12:11:25",
+      "side": "SELL",
+      "label": "8005234847",
+      "price": 0.47,
+      "size": 2.77,
+      "liquidity": "taker",
+      "fee": 0.0345
+    },
+    {
+      "time": "12:12:28",
+      "side": "BUY",
+      "label": "7227999553",
+      "price": 0.57,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "12:12:59",
+      "side": "SELL",
+      "label": "7227999553",
+      "price": 0.58,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "12:32:26",
+      "side": "BUY",
+      "label": "9525631534",
+      "price": 0.72,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "12:33:17",
+      "side": "SELL",
+      "label": "9525631534",
+      "price": 0.74,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0481
+    },
+    {
+      "time": "12:37:23",
+      "side": "BUY",
+      "label": "7227999553",
+      "price": 0.65,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "12:37:58",
+      "side": "SELL",
+      "label": "7227999553",
+      "price": 0.597,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0601
+    },
+    {
+      "time": "12:43:14",
+      "side": "BUY",
+      "label": "9525631534",
+      "price": 0.7,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "12:43:36",
+      "side": "SELL",
+      "label": "9525631534",
+      "price": 0.64,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0576
+    },
+    {
+      "time": "12:47:59",
+      "side": "BUY",
+      "label": "7227999553",
+      "price": 0.7,
+      "size": 1.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "12:48:21",
+      "side": "SELL",
+      "label": "7227999553",
+      "price": 0.73,
+      "size": 1.0,
+      "liquidity": "taker",
+      "fee": 0.0099
+    },
+    {
+      "time": "12:52:25",
+      "side": "BUY",
+      "label": "9525631534",
+      "price": 0.51,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "12:53:01",
+      "side": "SELL",
+      "label": "9525631534",
+      "price": 0.52,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "13:01:22",
+      "side": "BUY",
+      "label": "7227999553",
+      "price": 0.76,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "13:02:44",
+      "side": "SELL",
+      "label": "7227999553",
+      "price": 0.7,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0525
+    },
+    {
+      "time": "13:12:07",
+      "side": "BUY",
+      "label": "7227999553",
+      "price": 0.72,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "13:13:24",
+      "side": "SELL",
+      "label": "7227999553",
+      "price": 0.74,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0481
+    },
+    {
+      "time": "13:17:31",
+      "side": "BUY",
+      "label": "7227999553",
+      "price": 0.86,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "13:18:48",
+      "side": "SELL",
+      "label": "7227999553",
+      "price": 0.86,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0301
+    },
+    {
+      "time": "13:31:15",
+      "side": "BUY",
+      "label": "5039274014",
+      "price": 0.95,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "13:32:35",
+      "side": "SELL",
+      "label": "5039274014",
+      "price": 0.96,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0096
+    },
+    {
+      "time": "13:39:32",
+      "side": "BUY",
+      "label": "8285283220",
+      "price": 0.46,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "13:39:52",
+      "side": "SELL",
+      "label": "8285283220",
+      "price": 0.417,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0608
+    },
+    {
+      "time": "14:10:02",
+      "side": "BUY",
+      "label": "7713354091",
+      "price": 0.24,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "14:10:19",
+      "side": "SELL",
+      "label": "7713354091",
+      "price": 0.19,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0385
+    },
+    {
+      "time": "14:12:43",
+      "side": "BUY",
+      "label": "4607437499",
+      "price": 0.73,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "14:13:03",
+      "side": "SELL",
+      "label": "4607437499",
+      "price": 0.6535,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0566
+    },
+    {
+      "time": "14:14:21",
+      "side": "BUY",
+      "label": "1083974320",
+      "price": 0.5,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "14:14:37",
+      "side": "SELL",
+      "label": "1083974320",
+      "price": 0.45,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0619
+    },
+    {
+      "time": "14:16:15",
+      "side": "BUY",
+      "label": "5298323246",
+      "price": 0.86,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "14:17:04",
+      "side": "SELL",
+      "label": "5298323246",
+      "price": 0.87,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0283
+    },
+    {
+      "time": "14:21:30",
+      "side": "BUY",
+      "label": "8336720390",
+      "price": 0.29,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "14:22:22",
+      "side": "SELL",
+      "label": "8336720390",
+      "price": 0.31,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0535
+    },
+    {
+      "time": "14:24:02",
+      "side": "BUY",
+      "label": "3330391432",
+      "price": 0.4,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "14:24:25",
+      "side": "SELL",
+      "label": "3330391432",
+      "price": 0.34,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0561
+    },
+    {
+      "time": "14:24:35",
+      "side": "BUY",
+      "label": "3330391432",
+      "price": 0.37,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "14:25:00",
+      "side": "SELL",
+      "label": "3330391432",
+      "price": 0.3142,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0539
+    },
+    {
+      "time": "14:25:29",
+      "side": "BUY",
+      "label": "5504010534",
+      "price": 0.78,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "14:26:26",
+      "side": "SELL",
+      "label": "5504010534",
+      "price": 0.8,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.04
+    },
+    {
+      "time": "14:28:21",
+      "side": "BUY",
+      "label": "3330391432",
+      "price": 0.29,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "14:29:50",
+      "side": "SELL",
+      "label": "3330391432",
+      "price": 0.28,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0504
+    },
+    {
+      "time": "14:37:06",
+      "side": "BUY",
+      "label": "4607437499",
+      "price": 0.64,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "14:37:07",
+      "side": "SELL",
+      "label": "4607437499",
+      "price": 0.58,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0609
+    },
+    {
+      "time": "14:37:54",
+      "side": "BUY",
+      "label": "7759513471",
+      "price": 0.65,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "14:38:13",
+      "side": "SELL",
+      "label": "7759513471",
+      "price": 0.6,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.06
+    },
+    {
+      "time": "14:38:37",
+      "side": "BUY",
+      "label": "5298323246",
+      "price": 0.94,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "14:40:06",
+      "side": "SELL",
+      "label": "5298323246",
+      "price": 0.93,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0163
+    },
+    {
+      "time": "14:48:25",
+      "side": "BUY",
+      "label": "7759513471",
+      "price": 0.79,
+      "size": 2.5,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "14:48:53",
+      "side": "SELL",
+      "label": "7759513471",
+      "price": 0.737,
+      "size": 2.5,
+      "liquidity": "taker",
+      "fee": 0.0242
+    },
+    {
+      "time": "14:51:09",
+      "side": "BUY",
+      "label": "5504010534",
+      "price": 0.951,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "14:52:39",
+      "side": "SELL",
+      "label": "5504010534",
+      "price": 0.89,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0245
+    },
+    {
+      "time": "14:59:37",
+      "side": "BUY",
+      "label": "7759513471",
+      "price": 0.65,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "15:00:06",
+      "side": "SELL",
+      "label": "7759513471",
+      "price": 0.6035,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0598
+    },
+    {
+      "time": "15:04:33",
+      "side": "BUY",
+      "label": "1083974320",
+      "price": 0.59,
+      "size": 1.2,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "15:06:02",
+      "side": "SELL",
+      "label": "1083974320",
+      "price": 0.54,
+      "size": 1.2,
+      "liquidity": "taker",
+      "fee": 0.0149
+    },
+    {
+      "time": "15:11:33",
+      "side": "BUY",
+      "label": "1083974320",
+      "price": 0.57,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "15:12:26",
+      "side": "SELL",
+      "label": "1083974320",
+      "price": 0.51,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0625
+    },
+    {
+      "time": "15:30:06",
+      "side": "BUY",
+      "label": "1083974320",
+      "price": 0.57,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "15:31:29",
+      "side": "SELL",
+      "label": "1083974320",
+      "price": 0.57,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "15:44:26",
+      "side": "BUY",
+      "label": "8336720390",
+      "price": 0.29,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "15:44:27",
+      "side": "SELL",
+      "label": "8336720390",
+      "price": 0.24,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0456
+    },
+    {
+      "time": "15:46:43",
+      "side": "BUY",
+      "label": "8336720390",
+      "price": 0.31,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "15:46:45",
+      "side": "SELL",
+      "label": "8336720390",
+      "price": 0.32,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "15:47:11",
+      "side": "BUY",
+      "label": "8336720390",
+      "price": 0.29,
+      "size": 5.0,
+      "liquidity": "maker",
+      "fee": 0.0
+    },
+    {
+      "time": "15:48:41",
+      "side": "SELL",
+      "label": "8336720390",
+      "price": 0.25,
+      "size": 5.0,
+      "liquidity": "taker",
+      "fee": 0.0469
+    }
+  ],
+  "tracked": [
+    {
+      "market": "Estoril Open (Doubles): Droguet/Jacquet vs Luz/Matos",
+      "sport": "tennis",
+      "league": "atp-doubles",
+      "outcomes": [
+        "Droguet/Jacquet",
+        "Luz/Matos"
+      ],
+      "score": "0-0",
+      "period": "TB2",
+      "elapsed": "",
+      "model": 0.4591,
+      "market_price": null,
+      "anchor": 0.4591,
+      "tradeable": false,
+      "trade_status": "stale score"
+    },
+    {
+      "market": "Hamburg European Open (Doubles): Kempen/Panova vs Jakupovic/Radisic",
+      "sport": "tennis",
+      "league": "wta-doubles",
+      "outcomes": [
+        "Kempen/Panova",
+        "Jakupovic/Radisic"
+      ],
+      "score": "0-0",
+      "period": "S2",
+      "elapsed": "",
+      "model": 0.79,
+      "market_price": null,
+      "anchor": 0.79,
+      "tradeable": false,
+      "trade_status": "stale score"
+    },
+    {
+      "market": "Cleveland Guardians vs. Tampa Bay Rays",
+      "sport": "baseball",
+      "league": "mlb",
+      "outcomes": [
+        "Cleveland Guardians",
+        "Tampa Bay Rays"
+      ],
+      "score": "0-0",
+      "period": "Top 1st",
+      "elapsed": "",
+      "model": 0.4655,
+      "market_price": 0.994,
+      "anchor": 0.465,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Atlanta Braves vs. Baltimore Orioles",
+      "sport": "baseball",
+      "league": "mlb",
+      "outcomes": [
+        "Atlanta Braves",
+        "Baltimore Orioles"
+      ],
+      "score": "0-0",
+      "period": "Top 1st",
+      "elapsed": "",
+      "model": 0.5049,
+      "market_price": 0.999,
+      "anchor": 0.505,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Toronto Blue Jays vs. Boston Red Sox",
+      "sport": "baseball",
+      "league": "mlb",
+      "outcomes": [
+        "Toronto Blue Jays",
+        "Boston Red Sox"
+      ],
+      "score": "0-0",
+      "period": "Top 1st",
+      "elapsed": "",
+      "model": 0.4359,
+      "market_price": 0.001,
+      "anchor": 0.435,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Chicago Cubs vs. Pittsburgh Pirates",
+      "sport": "baseball",
+      "league": "mlb",
+      "outcomes": [
+        "Chicago Cubs",
+        "Pittsburgh Pirates"
+      ],
+      "score": "0-0",
+      "period": "Top 1st",
+      "elapsed": "",
+      "model": 0.4359,
+      "market_price": 0.001,
+      "anchor": 0.435,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Arizona Diamondbacks vs. Washington Nationals",
+      "sport": "baseball",
+      "league": "mlb",
+      "outcomes": [
+        "Arizona Diamondbacks",
+        "Washington Nationals"
+      ],
+      "score": "0-0",
+      "period": "Top 1st",
+      "elapsed": "",
+      "model": 0.5247,
+      "market_price": 0.001,
+      "anchor": 0.525,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Kansas City Royals vs. Detroit Tigers",
+      "sport": "baseball",
+      "league": "mlb",
+      "outcomes": [
+        "Kansas City Royals",
+        "Detroit Tigers"
+      ],
+      "score": "0-0",
+      "period": "Top 1st",
+      "elapsed": "",
+      "model": 0.3668,
+      "market_price": 0.999,
+      "anchor": 0.365,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "San Diego Padres vs. Miami Marlins",
+      "sport": "baseball",
+      "league": "mlb",
+      "outcomes": [
+        "San Diego Padres",
+        "Miami Marlins"
+      ],
+      "score": "0-0",
+      "period": "Top 1st",
+      "elapsed": "",
+      "model": 0.4852,
+      "market_price": 0.97,
+      "anchor": 0.485,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Los Angeles Dodgers vs. New York Mets",
+      "sport": "baseball",
+      "league": "mlb",
+      "outcomes": [
+        "Los Angeles Dodgers",
+        "New York Mets"
+      ],
+      "score": "0-0",
+      "period": "Top 1st",
+      "elapsed": "",
+      "model": 0.5838,
+      "market_price": 0.83,
+      "anchor": 0.585,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Houston Astros vs. Chicago White Sox",
+      "sport": "baseball",
+      "league": "mlb",
+      "outcomes": [
+        "Houston Astros",
+        "Chicago White Sox"
+      ],
+      "score": "0-0",
+      "period": "Top 1st",
+      "elapsed": "",
+      "model": 0.4753,
+      "market_price": 0.83,
+      "anchor": 0.475,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Colorado Rockies vs. Milwaukee Brewers",
+      "sport": "baseball",
+      "league": "mlb",
+      "outcomes": [
+        "Colorado Rockies",
+        "Milwaukee Brewers"
+      ],
+      "score": "0-0",
+      "period": "Top 1st",
+      "elapsed": "",
+      "model": 0.2381,
+      "market_price": 0.83,
+      "anchor": 0.235,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Athletics vs. Minnesota Twins",
+      "sport": "baseball",
+      "league": "mlb",
+      "outcomes": [
+        "Athletics",
+        "Minnesota Twins"
+      ],
+      "score": "0-0",
+      "period": "Top 1st",
+      "elapsed": "",
+      "model": 0.4162,
+      "market_price": 0.87,
+      "anchor": 0.415,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Cincinnati Reds vs. St. Louis Cardinals",
+      "sport": "baseball",
+      "league": "mlb",
+      "outcomes": [
+        "Cincinnati Reds",
+        "St. Louis Cardinals"
+      ],
+      "score": "0-0",
+      "period": "Top 1st",
+      "elapsed": "",
+      "model": 0.4556,
+      "market_price": 0.97,
+      "anchor": 0.455,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Seattle Mariners vs. Texas Rangers",
+      "sport": "baseball",
+      "league": "mlb",
+      "outcomes": [
+        "Seattle Mariners",
+        "Texas Rangers"
+      ],
+      "score": "0-0",
+      "period": "Top 1st",
+      "elapsed": "",
+      "model": 0.4852,
+      "market_price": 0.994,
+      "anchor": 0.485,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Los Angeles Angels vs. San Francisco Giants",
+      "sport": "baseball",
+      "league": "mlb",
+      "outcomes": [
+        "Los Angeles Angels",
+        "San Francisco Giants"
+      ],
+      "score": "0-0",
+      "period": "Top 1st",
+      "elapsed": "",
+      "model": 0.5345,
+      "market_price": 0.49,
+      "anchor": 0.535,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "New York Yankees vs. Philadelphia Phillies",
+      "sport": "baseball",
+      "league": "mlb",
+      "outcomes": [
+        "New York Yankees",
+        "Philadelphia Phillies"
+      ],
+      "score": "0-0",
+      "period": "Top 1st",
+      "elapsed": "",
+      "model": 0.3471,
+      "market_price": 0.8,
+      "anchor": 0.345,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Will Shandong Taishan FC win on 2026-07-26?",
+      "sport": "soccer",
+      "league": "chinese-super-league",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "score": "0-0",
+      "period": "1H",
+      "elapsed": "10",
+      "model": 0.4004,
+      "market_price": null,
+      "anchor": 0.405,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Will Shandong Taishan FC vs. Henan FC end in a draw?",
+      "sport": "soccer",
+      "league": "chinese-super-league",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "score": "0-0",
+      "period": "1H",
+      "elapsed": "10",
+      "model": 0.2491,
+      "market_price": 0.999,
+      "anchor": 0.235,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Mubadala Citi DC Open, Qualification: Andres Martin vs Moez Echargui",
+      "sport": "tennis",
+      "league": "atp",
+      "outcomes": [
+        "Andres Martin",
+        "Moez Echargui"
+      ],
+      "score": "0-0",
+      "period": "S1",
+      "elapsed": "",
+      "model": 0.505,
+      "market_price": 0.22,
+      "anchor": 0.505,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Winnipeg: Liam Draxl vs Toby Samuel",
+      "sport": "tennis",
+      "league": "atp",
+      "outcomes": [
+        "Liam Draxl",
+        "Toby Samuel"
+      ],
+      "score": "0-0",
+      "period": "LIVE",
+      "elapsed": "",
+      "model": 0.345,
+      "market_price": null,
+      "anchor": 0.345,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Mubadala Citi DC Open, Qualification: Zachary Svajda vs Cruz Hewitt",
+      "sport": "tennis",
+      "league": "atp",
+      "outcomes": [
+        "Zachary Svajda",
+        "Cruz Hewitt"
+      ],
+      "score": "0-0",
+      "period": "S1",
+      "elapsed": "",
+      "model": 0.865,
+      "market_price": 0.001,
+      "anchor": 0.865,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Mubadala Citi DC Open, Qualification: Martin Damm vs Abedallah Shelbayh",
+      "sport": "tennis",
+      "league": "atp",
+      "outcomes": [
+        "Martin Damm",
+        "Abedallah Shelbayh"
+      ],
+      "score": "4-6, 7-5, 2-2",
+      "period": "S3",
+      "elapsed": "",
+      "model": 0.631,
+      "market_price": 0.99,
+      "anchor": 0.7005,
+      "tradeable": false,
+      "trade_status": "stale score"
+    },
+    {
+      "market": "Estoril Open: Luca Van Assche vs Alexander Blockx",
+      "sport": "tennis",
+      "league": "atp",
+      "outcomes": [
+        "Luca Van Assche",
+        "Alexander Blockx"
+      ],
+      "score": "0-0",
+      "period": "S1",
+      "elapsed": "",
+      "model": 0.415,
+      "market_price": 0.999,
+      "anchor": 0.415,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Los Cabos Open, Qualification: Alex Hernandez vs Alan Magadan",
+      "sport": "tennis",
+      "league": "atp",
+      "outcomes": [
+        "Alex Hernandez",
+        "Alan Magadan"
+      ],
+      "score": "0-0",
+      "period": "S1",
+      "elapsed": "",
+      "model": 0.43,
+      "market_price": null,
+      "anchor": 0.43,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Mubadala Citi DC Open, Qualification: Marcos Giron vs Andre Ilagan",
+      "sport": "tennis",
+      "league": "atp",
+      "outcomes": [
+        "Marcos Giron",
+        "Andre Ilagan"
+      ],
+      "score": "0-0",
+      "period": "S1",
+      "elapsed": "",
+      "model": 0.845,
+      "market_price": null,
+      "anchor": 0.845,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Mubadala Citi DC Open, Qualification: Polina Kudermetova vs Varvara Lepchenko",
+      "sport": "tennis",
+      "league": "wta",
+      "outcomes": [
+        "Polina Kudermetova",
+        "Varvara Lepchenko"
+      ],
+      "score": "4-6, 6-6(7-6)",
+      "period": "TB2",
+      "elapsed": "",
+      "model": 0.1931,
+      "market_price": 0.999,
+      "anchor": 0.3808,
+      "tradeable": false,
+      "trade_status": "tiebreak paused"
+    },
+    {
+      "market": "Bloomfield Hills: Alex Michelsen vs Jacob Fearnley",
+      "sport": "tennis",
+      "league": "atp",
+      "outcomes": [
+        "Alex Michelsen",
+        "Jacob Fearnley"
+      ],
+      "score": "0-0",
+      "period": "S1",
+      "elapsed": "",
+      "model": 0.645,
+      "market_price": null,
+      "anchor": 0.645,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Mubadala Citi DC Open, Qualification: Mackenzie McDonald vs Trevor Svajda",
+      "sport": "tennis",
+      "league": "atp",
+      "outcomes": [
+        "Mackenzie McDonald",
+        "Trevor Svajda"
+      ],
+      "score": "0-0",
+      "period": "S1",
+      "elapsed": "",
+      "model": 0.625,
+      "market_price": 0.01,
+      "anchor": 0.625,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Palermo: Francesca Jones vs Fiona Ferro",
+      "sport": "tennis",
+      "league": "wta",
+      "outcomes": [
+        "Francesca Jones",
+        "Fiona Ferro"
+      ],
+      "score": "0-0",
+      "period": "S1",
+      "elapsed": "",
+      "model": 0.475,
+      "market_price": 0.31,
+      "anchor": 0.475,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "The Memphis Classic, Qualification: Yexin Ma vs Aoi Ito",
+      "sport": "tennis",
+      "league": "wta",
+      "outcomes": [
+        "Yexin Ma",
+        "Aoi Ito"
+      ],
+      "score": "0-0",
+      "period": "S1",
+      "elapsed": "",
+      "model": 0.385,
+      "market_price": null,
+      "anchor": 0.385,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "The Memphis Classic, Qualification: Storm Hunter vs Sofia Johnson",
+      "sport": "tennis",
+      "league": "wta",
+      "outcomes": [
+        "Storm Hunter",
+        "Sofia Johnson"
+      ],
+      "score": "0-0",
+      "period": "S1",
+      "elapsed": "",
+      "model": 0.665,
+      "market_price": 0.98,
+      "anchor": 0.665,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Mubadala Citi DC Open, Qualification: Daria Kasatkina vs Alana Smith",
+      "sport": "tennis",
+      "league": "wta",
+      "outcomes": [
+        "Daria Kasatkina",
+        "Alana Smith"
+      ],
+      "score": "0-0",
+      "period": "S1",
+      "elapsed": "",
+      "model": 0.91,
+      "market_price": 0.25,
+      "anchor": 0.91,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Mubadala Citi DC Open, Qualification: Gabriela Knutson vs Rebecca Sramkova",
+      "sport": "tennis",
+      "league": "wta",
+      "outcomes": [
+        "Gabriela Knutson",
+        "Rebecca Sramkova"
+      ],
+      "score": "0-0",
+      "period": "S1",
+      "elapsed": "",
+      "model": 0.355,
+      "market_price": 0.02,
+      "anchor": 0.355,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Mubadala Citi DC Open, Qualification: Heather Watson vs Julieta Pareja",
+      "sport": "tennis",
+      "league": "wta",
+      "outcomes": [
+        "Heather Watson",
+        "Julieta Pareja"
+      ],
+      "score": "4-6, 6-3, 1-2",
+      "period": "S3",
+      "elapsed": "",
+      "model": 0.1982,
+      "market_price": null,
+      "anchor": 0.3867,
+      "tradeable": false,
+      "trade_status": "stale score"
+    },
+    {
+      "market": "The Memphis Classic, Qualification: Kristina Liutova vs Maria Kozyreva",
+      "sport": "tennis",
+      "league": "wta",
+      "outcomes": [
+        "Kristina Liutova",
+        "Maria Kozyreva"
+      ],
+      "score": "0-1",
+      "period": "S1",
+      "elapsed": "",
+      "model": 0.6896,
+      "market_price": 0.99,
+      "anchor": 0.795,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Segovia: Matteo Martineau vs Luka Pavlovic",
+      "sport": "tennis",
+      "league": "atp",
+      "outcomes": [
+        "Matteo Martineau",
+        "Luka Pavlovic"
+      ],
+      "score": "0-0",
+      "period": "S1",
+      "elapsed": "",
+      "model": 0.345,
+      "market_price": 0.52,
+      "anchor": 0.345,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Will Chengdu Rongcheng FC win on 2026-07-26?",
+      "sport": "soccer",
+      "league": "chinese-super-league",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "score": "0-0",
+      "period": "1H",
+      "elapsed": "10",
+      "model": 0.417,
+      "market_price": 0.999,
+      "anchor": 0.425,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Will Chengdu Rongcheng FC vs. Beijing Guoan FC end in a draw?",
+      "sport": "soccer",
+      "league": "chinese-super-league",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "score": "0-0",
+      "period": "1H",
+      "elapsed": "10",
+      "model": 0.2701,
+      "market_price": 0.48,
+      "anchor": 0.255,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Will Beijing Guoan FC win on 2026-07-26?",
+      "sport": "soccer",
+      "league": "chinese-super-league",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "score": "0-0",
+      "period": "1H",
+      "elapsed": "10",
+      "model": 0.3129,
+      "market_price": null,
+      "anchor": 0.32,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Will Henan FC win on 2026-07-26?",
+      "sport": "soccer",
+      "league": "chinese-super-league",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "score": "0-0",
+      "period": "1H",
+      "elapsed": "10",
+      "model": 0.3505,
+      "market_price": 0.01,
+      "anchor": 0.355,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Mubadala Citi DC Open, Qualification (Doubles): Romboli/Smith vs Kozlov/Lee",
+      "sport": "tennis",
+      "league": "atp-doubles",
+      "outcomes": [
+        "Romboli/Smith",
+        "Kozlov/Lee"
+      ],
+      "score": "0-0",
+      "period": "S1",
+      "elapsed": "",
+      "model": 0.645,
+      "market_price": null,
+      "anchor": 0.645,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "The Memphis Classic, Qualification: Katherine Sebov vs Maria Aran Teixido Garcia",
+      "sport": "tennis",
+      "league": "wta",
+      "outcomes": [
+        "Katherine Sebov",
+        "Maria Aran Teixido Garcia"
+      ],
+      "score": "1-1",
+      "period": "S1",
+      "elapsed": "",
+      "model": 0.7005,
+      "market_price": null,
+      "anchor": 0.705,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "The Memphis Classic, Qualification: Tatiana Prozorova vs Kennedy Drenser-Hagmann",
+      "sport": "tennis",
+      "league": "wta",
+      "outcomes": [
+        "Tatiana Prozorova",
+        "Kennedy Drenser-Hagmann"
+      ],
+      "score": "1-0",
+      "period": "S1",
+      "elapsed": "",
+      "model": 0.9052,
+      "market_price": 0.99,
+      "anchor": 0.895,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "The Memphis Classic, Qualification: Iryna Shymanovich vs Ankita Raina",
+      "sport": "tennis",
+      "league": "wta",
+      "outcomes": [
+        "Iryna Shymanovich",
+        "Ankita Raina"
+      ],
+      "score": "0-0",
+      "period": "S1",
+      "elapsed": "",
+      "model": 0.835,
+      "market_price": 0.02,
+      "anchor": 0.835,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Los Cabos Open, Qualification: Soon-Woo Kwon vs Edward Winter",
+      "sport": "tennis",
+      "league": "atp",
+      "outcomes": [
+        "Soon-Woo Kwon",
+        "Edward Winter"
+      ],
+      "score": "0-0",
+      "period": "S1",
+      "elapsed": "",
+      "model": 0.815,
+      "market_price": 0.001,
+      "anchor": 0.815,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Los Cabos Open, Qualification: Aidan Mayo vs Roger Pascual",
+      "sport": "tennis",
+      "league": "atp",
+      "outcomes": [
+        "Aidan Mayo",
+        "Roger Pascual"
+      ],
+      "score": "0-0",
+      "period": "S1",
+      "elapsed": "",
+      "model": 0.535,
+      "market_price": null,
+      "anchor": 0.535,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Will SE Palmeiras win on 2026-07-26?",
+      "sport": "soccer",
+      "league": "brazil-serie-a",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "score": "0-0",
+      "period": "1H",
+      "elapsed": "1",
+      "model": 0.5941,
+      "market_price": 0.01,
+      "anchor": 0.595,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Will SE Palmeiras vs. CA Mineiro end in a draw?",
+      "sport": "soccer",
+      "league": "brazil-serie-a",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "score": "0-0",
+      "period": "1H",
+      "elapsed": "1",
+      "model": 0.2466,
+      "market_price": null,
+      "anchor": 0.245,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Will CA Mineiro win on 2026-07-26?",
+      "sport": "soccer",
+      "league": "brazil-serie-a",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "score": "0-0",
+      "period": "1H",
+      "elapsed": "1",
+      "model": 0.1445,
+      "market_price": 0.98,
+      "anchor": 0.145,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Will Clube do Remo win on 2026-07-26?",
+      "sport": "soccer",
+      "league": "brazil-serie-a",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "score": "0-0",
+      "period": "1H",
+      "elapsed": "3",
+      "model": 0.3823,
+      "market_price": 0.001,
+      "anchor": 0.385,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Will Clube do Remo vs. EC Vit\u00f3ria end in a draw?",
+      "sport": "soccer",
+      "league": "brazil-serie-a",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "score": "0-0",
+      "period": "1H",
+      "elapsed": "3",
+      "model": 0.2905,
+      "market_price": null,
+      "anchor": 0.285,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Will EC Vit\u00f3ria win on 2026-07-26?",
+      "sport": "soccer",
+      "league": "brazil-serie-a",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "score": "0-0",
+      "period": "1H",
+      "elapsed": "3",
+      "model": 0.3225,
+      "market_price": null,
+      "anchor": 0.325,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Will CD Riestra win on 2026-07-26?",
+      "sport": "soccer",
+      "league": "primera-divisin-argentina",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "score": "0-0",
+      "period": "1H",
+      "elapsed": "3",
+      "model": 0.2131,
+      "market_price": 0.999,
+      "anchor": 0.215,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Will CD Riestra vs. CA Boca Juniors end in a draw?",
+      "sport": "soccer",
+      "league": "primera-divisin-argentina",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "score": "0-0",
+      "period": "1H",
+      "elapsed": "3",
+      "model": 0.3411,
+      "market_price": null,
+      "anchor": 0.335,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Will CA Boca Juniors win on 2026-07-26?",
+      "sport": "soccer",
+      "league": "primera-divisin-argentina",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "score": "0-0",
+      "period": "1H",
+      "elapsed": "3",
+      "model": 0.4522,
+      "market_price": 0.999,
+      "anchor": 0.455,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Will Club Necaxa win on 2026-07-26?",
+      "sport": "soccer",
+      "league": "mex-2025",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "score": "0-0",
+      "period": "1H",
+      "elapsed": "2",
+      "model": 0.2635,
+      "market_price": 0.999,
+      "anchor": 0.265,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Will Club Necaxa vs. CF Monterrey end in a draw?",
+      "sport": "soccer",
+      "league": "mex-2025",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "score": "0-0",
+      "period": "1H",
+      "elapsed": "2",
+      "model": 0.2483,
+      "market_price": 0.99,
+      "anchor": 0.245,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Will CF Monterrey win on 2026-07-26?",
+      "sport": "soccer",
+      "league": "mex-2025",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "score": "0-0",
+      "period": "1H",
+      "elapsed": "2",
+      "model": 0.4931,
+      "market_price": 0.48,
+      "anchor": 0.495,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Targu Mures: Elena Malygina vs Elena Ruxandra Bertea",
+      "sport": "tennis",
+      "league": "wta",
+      "outcomes": [
+        "Elena Malygina",
+        "Elena Ruxandra Bertea"
+      ],
+      "score": "0-0",
+      "period": "S1",
+      "elapsed": "",
+      "model": 0.415,
+      "market_price": 0.057,
+      "anchor": 0.415,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Targu Mures: Caijsa Hennemann vs Mia Pohankova",
+      "sport": "tennis",
+      "league": "wta",
+      "outcomes": [
+        "Caijsa Hennemann",
+        "Mia Pohankova"
+      ],
+      "score": "0-0",
+      "period": "S1",
+      "elapsed": "",
+      "model": 0.465,
+      "market_price": 0.755,
+      "anchor": 0.465,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Will CF Pachuca win on 2026-07-26?",
+      "sport": "soccer",
+      "league": "mex-2025",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "score": "0-0",
+      "period": "1H",
+      "elapsed": "3",
+      "model": 0.5822,
+      "market_price": null,
+      "anchor": 0.585,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Will CF Pachuca vs. Quer\u00e9taro FC end in a draw?",
+      "sport": "soccer",
+      "league": "mex-2025",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "score": "0-0",
+      "period": "1H",
+      "elapsed": "3",
+      "model": 0.2298,
+      "market_price": null,
+      "anchor": 0.225,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    },
+    {
+      "market": "Will Quer\u00e9taro FC win on 2026-07-26?",
+      "sport": "soccer",
+      "league": "mex-2025",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "score": "0-0",
+      "period": "1H",
+      "elapsed": "3",
+      "model": 0.1734,
+      "market_price": 0.01,
+      "anchor": 0.175,
+      "tradeable": false,
+      "trade_status": "waiting for next score"
+    }
+  ],
+  "rejections": {
+    "no fresh book": 2279656,
+    "waiting for live score": 1891311,
+    "waiting for next score": 832478,
+    "stale score": 151052,
+    "tiebreak paused": 10705,
+    "score-change pause": 1132,
+    "no maker edge or inventory room": 441
+  },
+  "equity_curve": [
+    {
+      "t": 1785148375071,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148380123,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148385154,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148390209,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148395272,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148400315,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148405338,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148410397,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148415469,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148420511,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148425653,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148430720,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148435779,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148440838,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148445900,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148450933,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148455964,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148461034,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148466066,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148471142,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148476196,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148481250,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148486285,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148491901,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148496933,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148501966,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148507020,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148512047,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148517097,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148522130,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148527159,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148532215,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148537281,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148542336,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148547398,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148552463,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148557943,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148562967,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148568036,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148573073,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148578099,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148583155,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148588180,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148593206,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148598271,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148603330,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148608387,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148613438,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148618505,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148623637,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148628676,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148633732,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148638791,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148643834,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148648880,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148653906,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148658962,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148664001,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148669066,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148674109,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148679161,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148684204,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148689269,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148694302,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148699341,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148704377,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148709447,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148714538,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148719592,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148724620,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148729685,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148734739,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148739817,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148744875,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148749943,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148755078,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148760107,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148765161,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148770196,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148775256,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148780332,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148785384,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148790413,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148795482,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148800551,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148805610,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148810672,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148815729,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148820794,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148825824,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148830871,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148835932,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148840981,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148846034,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148851097,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148856172,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148861196,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148866246,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148871280,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148876331,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148881392,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148886444,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148891480,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148896540,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148901604,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148906649,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148911683,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148916717,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148921773,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148926819,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148931877,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148936926,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148941990,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148947050,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148952075,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148957099,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148962152,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148967216,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148972274,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148977335,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148982403,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148987477,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148992520,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785148997583,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149002613,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149007671,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149012703,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149017770,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149022805,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149027880,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149032929,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149037978,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149043039,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149048066,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149053107,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149058135,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149063168,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149068196,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149073254,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149078292,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149083369,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149088854,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149093880,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149098922,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149103979,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149109035,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149114069,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149119113,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149124175,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149129232,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149134298,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149139360,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149144386,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149149443,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149155133,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149160156,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149165214,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149170263,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149175334,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149180370,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149185416,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149190469,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149195535,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149200612,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149205664,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149210713,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149215780,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149221354,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149226382,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149231422,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149236443,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149241473,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149246534,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149251584,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149256624,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149261684,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149266744,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149271805,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149278033,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149283064,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149288089,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149293198,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149298258,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149303296,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149308362,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149313426,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149318454,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149323517,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149328580,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149333653,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149338677,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149343699,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149348751,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149353826,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149358880,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149363944,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149368981,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149374022,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149379075,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149384134,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149389187,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149394248,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149399320,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149404353,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149409393,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149414472,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149419564,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149424607,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149429691,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149434717,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149439755,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149444812,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149449876,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149454921,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149459964,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149465004,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149470065,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149475122,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149480163,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149485208,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149490247,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149495312,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149500393,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149505461,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149510523,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149515596,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149520656,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149525731,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149530759,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149535814,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149540862,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149545899,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149550956,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149555980,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149561074,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149566122,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149571145,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149576206,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149581273,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149586341,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149591417,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149596457,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149601506,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149606557,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149611623,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149616666,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149621704,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149626736,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149631813,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149636880,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149641919,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149646975,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149652024,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149657079,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149662130,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149667190,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149672248,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149677276,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149682336,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149687373,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149692402,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149697463,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149702501,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149707531,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149712604,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149717662,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149722745,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149727798,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149732825,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149737877,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149742912,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149748001,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149753392,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149758416,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149763467,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149768527,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149773585,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149778648,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149783716,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149788749,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149793804,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149798875,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149803930,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149808993,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149814050,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149819568,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149824592,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149829625,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149834674,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149839744,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149844800,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149849848,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149854894,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149859957,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149864999,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149870030,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149875098,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149880154,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149885574,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149890597,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149895655,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149900698,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149905764,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149910822,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149915877,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149920909,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149925964,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149931007,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149936074,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149941112,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149946149,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149951172,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149956232,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149961291,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149966374,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149971424,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149976470,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149981504,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149986552,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149991591,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785149996656,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150001693,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150006733,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150011797,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150016860,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150021887,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150026946,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150031997,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150037047,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150042070,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150047100,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150052123,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150057162,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150062192,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150067251,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150072283,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150077309,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150082335,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150087373,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150092426,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150097457,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150102505,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150107540,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150112571,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150117633,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150122665,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150127721,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150132778,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150137824,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150142850,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150147898,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150152923,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150157968,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150162992,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150168059,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150173101,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150178125,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150183184,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150188213,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150193243,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150198288,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150203334,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150208365,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150213437,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150218462,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150223532,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150228566,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150233597,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150238622,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150243689,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150248731,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150253785,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150258863,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150263928,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150268954,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150274009,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150279069,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150284529,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150289552,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150294625,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150299681,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150304746,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150309787,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150314859,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150319927,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150324980,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150330036,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150335060,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150340119,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150345148,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150350720,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150355743,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150360797,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150365826,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150370886,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150375945,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150380999,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150386059,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150391113,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150396159,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150401220,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150406250,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150411303,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150416328,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150421376,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150426434,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150431477,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150436529,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150441599,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150446664,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150451714,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150456753,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150461821,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150466884,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150471956,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150477039,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150482087,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150487118,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150492182,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150497228,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150502286,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150507333,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150512380,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150517421,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150522450,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150527475,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150532543,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150537604,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150542665,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150547719,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150552787,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150557841,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150562896,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150567947,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150573019,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150578086,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150583141,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150588218,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150593275,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150598327,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150603400,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150608477,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150613553,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150618576,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150623625,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150628675,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150633743,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150638808,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150643873,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150648901,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150653951,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150658974,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150664020,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150669086,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150674149,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150679206,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150684276,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150689298,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150694333,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150699378,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150704429,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150709468,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150714540,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150719592,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150724624,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150729689,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150734746,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150739771,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150744820,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150749889,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150754935,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150759993,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150765045,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150770093,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150775153,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150780194,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150785255,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150790311,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150795384,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150800407,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150805469,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150810521,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150815554,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150820576,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150825612,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150830678,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150835731,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150840783,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150845829,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150850858,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150855911,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150860946,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150865989,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150871035,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150876099,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150881194,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150886228,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150891252,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150896296,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150901358,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150906419,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150911494,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150916532,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150921576,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150926601,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150931653,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150936688,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150941728,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150946750,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150951861,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150956918,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150961974,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150967040,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150972067,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150977109,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150982139,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150987169,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150992241,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785150997310,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151002360,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151007384,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151012459,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151017546,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151022614,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151027656,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151032725,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151037784,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151042807,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151047836,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151052891,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151057976,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151063030,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151068065,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151073095,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151078138,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151083163,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151088192,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151093225,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151098253,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151103281,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151108307,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151113348,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151118419,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151123464,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151128522,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151133550,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151138601,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151143679,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151148721,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151153789,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151158879,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151163943,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151169005,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151174050,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151179100,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151184166,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151189193,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151194236,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151199287,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151204313,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151209363,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151214444,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151219489,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151224554,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151229619,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151234653,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151239707,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151244735,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151249770,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151254820,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151259862,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151264892,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151269923,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151274965,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151280318,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151285344,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151290372,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151295395,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151300428,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151305450,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151310476,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151315511,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151320541,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151325604,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151330648,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151335674,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151340703,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151345759,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151350907,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151355961,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151361039,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151366067,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151371106,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151376131,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151381158,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151386186,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151391214,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151396269,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151401297,
+      "equity": 114.8959,
+      "cash": 114.8959
+    },
+    {
+      "t": 1785151406322,
+      "equity": 114.8959,
+      "cash": 114.8959
+    }
+  ],
+  "stopped_at": "2026-07-27T11:23:33.144887+00:00"
+}
